@@ -1,0 +1,32 @@
+{
+    "name": "Josep Lopez Camuñas",
+    "initials": "JL",
+    "title": "PhD Student in Computer Vision, Affective Computing, and Social Robotics",
+    "affiliation": "Universitat Oberta de Catalunya (UOC)",
+    "affiliation2": "Barcelona, Spain",
+    "collaborations": ["MIT CSAIL", "Northeastern University"],
+    "location": "Barcelona, Spain",
+
+    "primaryEmail": "jlopezcamu@uoc.edu",
+    "secondaryEmail": "jo.lopez@northeastern.edu",
+
+    "avatarUrl": "assets/avatar1.png",
+    "cvUrl": "assets/josep_cv.pdf",
+
+    "openToInternships": true,
+    "internshipNote": "Currently looking for research internships in industry for Spring or Summer 2026.",
+
+    "researchTopics": [
+        "Multimodal Learning & Perception",
+        "Emotion & Affect Understanding",
+        "Explainable / Interpretable AI",
+        "Human-Centered & Trustworthy AI",
+        "Human–Robot Interaction & Social Robotics",
+        "Computer Vision for People-Centric Applications"
+    ],
+    "aboutParagraphs": [
+        "I am currently a doctoral student in the <strong>Network and Information Technologies (NIT)</strong> program at the <strong>Universitat Oberta de Catalunya (UOC)</strong>, advised by <strong>Prof. Agata Lapedriza</strong>. As a member of the <strong>AIWELL (AI for Human WELL-being)</strong> lab, I explore <strong>emotion representations</strong> and <strong>model interpretability</strong> in multimodal systems.",
+        "Prior to my PhD, I earned a <strong>Bachelor&#39;s degree in Computer Science</strong> from the <strong>Universitat de Barcelona</strong>. I then worked for two years as a <strong>Data Scientist</strong> at <strong>DMD.Solutions</strong>, a consulting company focused on reliability and safety in the aerospace industry. After that, I completed a <strong>Master&#39;s in Computer Vision</strong> at the <strong>Universitat Autònoma de Barcelona (UAB)</strong>, where I became increasingly interested in <strong>human-centered AI</strong> and <strong>multimodal systems</strong>.",
+        "I am actively collaborating with <strong>Northeastern University</strong> and the <strong>MIT CSAIL Vision Group</strong> in <strong>Antonio Torralba&#39;s lab</strong>. As part of this collaboration, I completed two mid-term research visits to both institutions in <strong>2024</strong> and <strong>2025</strong>. I also contributed to the organization of <strong>KDD 2024</strong> in Barcelona and have served as a reviewer for <strong>WACV</strong>, <strong>CVPR</strong> and <strong>NeurIPS 2025</strong>. I enjoy being involved in the academic community and regularly engage in research, reviewing, and event organization activities that support knowledge exchange and collaboration."
+    ]
+}

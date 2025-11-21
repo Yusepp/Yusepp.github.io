@@ -1,0 +1,17 @@
+{
+    "teaching": [
+        {
+            "term": "2025 Winter",
+            "course": "Advanced Computer Vision (Video Architectures)",
+            "role": "Teaching Assistant",
+            "url": "https://www.talent.upc.edu/ing/estudis/formacio/curs/310400/postgraduate-course-artificial-intelligence-deep-learning/"
+        }
+    ],
+
+    "awards": ["PhD Fellowship, UOC, 2022–present"],
+
+    "service": [
+        "Reviewer: CVPR 2025, NeurIPS 2025, WACV 2025, CIARP 2025",
+        "Student volunteer: KDD 2024"
+    ]
+}

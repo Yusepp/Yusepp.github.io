@@ -1,21 +1,10 @@
-// main.js
+// main.js (multi-JSON + pub_extras.json for image/project/code)
 
-// -------- Publication image mapping --------
-// Map *lowercased* titles to image paths in assets/papers/*.png
-const PUB_IMAGES = {
-    "automated detection of visual attribute reliance with a self-reflective agent":
-        "assets/papers/saia.png",
-    "experimenting with affective computing models in video interviews with spanish-speaking older adults":
-        "assets/papers/elder.png",
-    "openmaia: a multimodal automated interpretability agent based on open-source models":
-        "assets/papers/openmaia.png",
-    // Add more titles -> image paths as you like
-};
+// -------- Helpers for mapping keys --------
 
-function getPubImage(title) {
+function titleKey(title) {
     if (!title) return "";
-    const key = title.toLowerCase().trim();
-    return PUB_IMAGES[key] || "";
+    return title.toLowerCase().trim();
 }
 
 // -------- Author formatting / highlighting --------
@@ -37,7 +26,7 @@ function highlightMyName(authorStr) {
     MY_AUTHOR_NAMES.forEach(function (name) {
         const re = new RegExp(escapeRegExp(name), "gi");
         result = result.replace(re, function (match) {
-            // keep original spelling/case in the text, just wrap in <strong>
+            // Keep original spelling/case, just wrap in <strong>
             return "<strong>" + match + "</strong>";
         });
     });
@@ -45,12 +34,11 @@ function highlightMyName(authorStr) {
 }
 
 /**
- * Turn "A and B and C and D" into
- * "A, B, C, D" and bold your name.
+ * Turn "A and B and C and D" into "A, B, C, D"
+ * and bold your name.
  */
 function formatAuthors(authorStr) {
     if (!authorStr) return "";
-    // Split on " and " (case-insensitive), multiple times if needed.
     const parts = authorStr
         .split(/\s+and\s+/i)
         .map(function (p) {
@@ -67,54 +55,55 @@ function formatAuthors(authorStr) {
     return formatted.join(", ");
 }
 
-// -------- CONFIG LOADER --------
+// -------- Helper: safe JSON fetch --------
 
-async function loadConfig() {
-    let cfg;
+async function fetchJsonSafe(url) {
     try {
-        const res = await fetch("config.json");
+        const res = await fetch(url);
         if (!res.ok) {
-            throw new Error("config.json HTTP " + res.status);
+            throw new Error(url + " HTTP " + res.status);
         }
-        cfg = await res.json();
+        return await res.json();
     } catch (err) {
-        console.error("Error loading config.json:", err);
-        return;
+        console.error("Error loading " + url + ":", err);
+        return null;
     }
+}
+
+// -------- PERSONAL INFO (profile, research, about) --------
+
+async function loadPersonalInfo() {
+    const data = await fetchJsonSafe("info/personal_info.json");
+    if (!data) return;
 
     function setText(id, value) {
         const el = document.getElementById(id);
         if (el && value != null) el.textContent = value;
     }
 
-    function setHTML(id, html) {
-        const el = document.getElementById(id);
-        if (el && html != null) el.innerHTML = html;
-    }
-
-    // ---------- Page meta / footer ----------
-    setText("footer-name", cfg.name);
+    // Page meta / footer name
+    setText("footer-name", data.name);
     const yearEl = document.getElementById("footer-year");
     if (yearEl) yearEl.textContent = new Date().getFullYear();
-    if (cfg.name) {
-        document.title = cfg.name + " – Research Homepage";
+    if (data.name) {
+        document.title = data.name + " – Research Homepage";
     }
 
-    // ---------- Profile basics ----------
-    setText("profile-name", cfg.name || "Your Name");
-    setText("profile-title", cfg.title || "");
-    const affiliation = cfg.affiliation2
-        ? (cfg.affiliation || "") + ", " + cfg.affiliation2
-        : cfg.affiliation;
+    // Profile basics
+    setText("profile-name", data.name || "Your Name");
+    setText("profile-title", data.title || "");
+    const affiliation = data.affiliation2
+        ? (data.affiliation || "") + ", " + data.affiliation2
+        : data.affiliation;
     setText("profile-affiliation", affiliation || "");
-    setText("profile-location", cfg.location || "");
+    setText("profile-location", data.location || "");
 
-    // ---------- Photo / avatar ----------
+    // Photo / avatar
     const photoEl = document.getElementById("profile-photo");
     const avatarEl = document.getElementById("profile-avatar-fallback");
     if (photoEl && avatarEl) {
-        if (cfg.avatarUrl) {
-            photoEl.src = cfg.avatarUrl;
+        if (data.avatarUrl) {
+            photoEl.src = data.avatarUrl;
             photoEl.style.display = "block";
             avatarEl.style.display = "none";
             photoEl.onerror = function () {
@@ -125,52 +114,98 @@ async function loadConfig() {
             photoEl.style.display = "none";
             avatarEl.style.display = "flex";
         }
-        if (cfg.initials) {
-            avatarEl.textContent = cfg.initials;
+        if (data.initials) {
+            avatarEl.textContent = data.initials;
         }
     }
 
-    // ---------- Emails ----------
-    if (cfg.primaryEmail) {
-        setHTML(
-            "profile-email-primary",
+    // Emails
+    const emailPrimary = document.getElementById("profile-email-primary");
+    if (emailPrimary && data.primaryEmail) {
+        emailPrimary.innerHTML =
             '<a href="mailto:' +
-                cfg.primaryEmail +
-                '">' +
-                cfg.primaryEmail +
-                "</a>",
-        );
+            data.primaryEmail +
+            '">' +
+            data.primaryEmail +
+            "</a>";
     }
-    if (cfg.secondaryEmail) {
-        setHTML(
-            "profile-email-secondary",
+    const emailSecondary = document.getElementById("profile-email-secondary");
+    if (emailSecondary && data.secondaryEmail) {
+        emailSecondary.innerHTML =
             '<a href="mailto:' +
-                cfg.secondaryEmail +
-                '">' +
-                cfg.secondaryEmail +
-                "</a>",
-        );
+            data.secondaryEmail +
+            '">' +
+            data.secondaryEmail +
+            "</a>";
     }
 
-    // ---------- Online links ----------
-    const links = [];
-    if (cfg.github) {
-        links.push({
-            label: "GitHub",
-            url: "https://github.com/" + cfg.github,
+    // Research topics
+    const topicsEl = document.getElementById("research-topics");
+    if (topicsEl) {
+        topicsEl.innerHTML = "";
+        (data.researchTopics || []).forEach(function (topic) {
+            const span = document.createElement("span");
+            span.textContent = topic;
+            topicsEl.appendChild(span);
         });
     }
-    if (cfg.scholarUrl) {
-        links.push({ label: "Scholar", url: cfg.scholarUrl });
+
+    // Internship note
+    if (data.openToInternships && data.internshipNote) {
+        const block = document.getElementById("internship-block");
+        const note = document.getElementById("internship-note");
+        if (block && note) {
+            note.textContent = data.internshipNote;
+            block.classList.remove("d-none");
+        }
     }
-    if (cfg.linkedinUrl) {
-        links.push({ label: "LinkedIn", url: cfg.linkedinUrl });
+
+    // CV link
+    if (data.cvUrl) {
+        const cvBlock = document.getElementById("cv-block");
+        const cvLink = document.getElementById("cv-link");
+        if (cvBlock && cvLink) {
+            cvLink.href = data.cvUrl;
+            cvBlock.classList.remove("d-none");
+        }
     }
-    if (cfg.orcidUrl) {
-        links.push({ label: "ORCID", url: cfg.orcidUrl });
+
+    // About text (optional override)
+    const aboutBody = document.getElementById("about-body");
+    if (
+        aboutBody &&
+        Array.isArray(data.aboutParagraphs) &&
+        data.aboutParagraphs.length
+    ) {
+        aboutBody.innerHTML = data.aboutParagraphs
+            .map(function (p) {
+                return "<p>" + p + "</p>";
+            })
+            .join("");
     }
-    if (cfg.twitterUrl) {
-        links.push({ label: "Twitter/X", url: cfg.twitterUrl });
+}
+
+// -------- SOCIAL LINKS (rrss.json) --------
+
+async function loadSocialLinks() {
+    const data = await fetchJsonSafe("info/rrss.json");
+    if (!data) return;
+
+    const links = [];
+    if (data.github) {
+        links.push({
+            label: "GitHub",
+            url: "https://github.com/" + data.github,
+        });
+    }
+    if (data.scholarUrl) {
+        links.push({ label: "Scholar", url: data.scholarUrl });
+    }
+    if (data.linkedinUrl) {
+        links.push({ label: "LinkedIn", url: data.linkedinUrl });
+    }
+    if (data.twitterUrl) {
+        links.push({ label: "Twitter/X", url: data.twitterUrl });
     }
 
     const linksContainer = document.getElementById("profile-links");
@@ -186,69 +221,51 @@ async function loadConfig() {
             linksContainer.appendChild(a);
         });
     }
+}
 
-    // ---------- Research topics ----------
-    const topicsEl = document.getElementById("research-topics");
-    if (topicsEl) {
-        topicsEl.innerHTML = "";
-        (cfg.researchTopics || []).forEach(function (topic) {
-            const span = document.createElement("span");
-            span.textContent = topic;
-            topicsEl.appendChild(span);
-        });
-    }
+// -------- NEWS (news.json) --------
 
-    // ---------- Internship note ----------
-    if (cfg.openToInternships && cfg.internshipNote) {
-        const block = document.getElementById("internship-block");
-        const note = document.getElementById("internship-note");
-        if (block && note) {
-            note.textContent = cfg.internshipNote;
-            block.classList.remove("d-none");
-        }
-    }
+async function loadNews() {
+    const data = await fetchJsonSafe("info/news.json");
+    if (!data || !Array.isArray(data.news)) return;
 
-    // ---------- CV link ----------
-    if (cfg.cvUrl) {
-        const cvBlock = document.getElementById("cv-block");
-        const cvLink = document.getElementById("cv-link");
-        if (cvBlock && cvLink) {
-            cvLink.href = cfg.cvUrl;
-            cvBlock.classList.remove("d-none");
-        }
-    }
-
-    // ---------- News ----------
     const newsList = document.getElementById("news-list");
-    if (newsList) {
-        newsList.innerHTML = "";
-        (cfg.news || []).forEach(function (item) {
-            const li = document.createElement("li");
-            li.className = "mb-1";
-            const dateSpan = document.createElement("span");
-            dateSpan.className = "news-date";
-            dateSpan.textContent = "[" + item.label + "]";
-            li.appendChild(dateSpan);
-            li.appendChild(document.createTextNode(" "));
-            if (item.url) {
-                const a = document.createElement("a");
-                a.href = item.url;
-                a.target = "_blank";
-                a.rel = "noopener";
-                a.textContent = item.text;
-                li.appendChild(a);
-            } else {
-                li.appendChild(document.createTextNode(item.text));
-            }
-            newsList.appendChild(li);
-        });
-    }
+    if (!newsList) return;
 
-    // ---------- Teaching ----------
+    newsList.innerHTML = "";
+    data.news.forEach(function (item) {
+        const li = document.createElement("li");
+        li.className = "mb-1";
+        const dateSpan = document.createElement("span");
+        dateSpan.className = "news-date";
+        dateSpan.textContent = "[" + item.label + "]";
+        li.appendChild(dateSpan);
+        li.appendChild(document.createTextNode(" "));
+        if (item.url) {
+            const a = document.createElement("a");
+            a.href = item.url;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.textContent = item.text;
+            li.appendChild(a);
+        } else {
+            li.appendChild(document.createTextNode(item.text));
+        }
+        newsList.appendChild(li);
+    });
+}
+
+// -------- TEACHING + AWARDS + SERVICE (activities.json) --------
+
+async function loadActivities() {
+    const data = await fetchJsonSafe("info/activities.json");
+    if (!data) return;
+
+    // Teaching
     const teachingList = document.getElementById("teaching-list");
-    if (teachingList) {
+    if (teachingList && Array.isArray(data.teaching)) {
         teachingList.innerHTML = "";
-        (cfg.teaching || []).forEach(function (t) {
+        data.teaching.forEach(function (t) {
             const li = document.createElement("li");
             li.className = "mb-1";
             const termSpan = document.createElement("span");
@@ -273,11 +290,11 @@ async function loadConfig() {
         });
     }
 
-    // ---------- Awards ----------
+    // Awards
     const awardsList = document.getElementById("awards-list");
-    if (awardsList) {
+    if (awardsList && Array.isArray(data.awards)) {
         awardsList.innerHTML = "";
-        (cfg.awards || []).forEach(function (text) {
+        data.awards.forEach(function (text) {
             const li = document.createElement("li");
             li.className = "mb-1";
             li.textContent = text;
@@ -285,11 +302,11 @@ async function loadConfig() {
         });
     }
 
-    // ---------- Service ----------
+    // Service
     const serviceList = document.getElementById("service-list");
-    if (serviceList) {
+    if (serviceList && Array.isArray(data.service)) {
         serviceList.innerHTML = "";
-        (cfg.service || []).forEach(function (text) {
+        data.service.forEach(function (text) {
             const li = document.createElement("li");
             li.className = "mb-1";
             li.textContent = text;
@@ -298,24 +315,46 @@ async function loadConfig() {
     }
 }
 
-// -------- PUBLICATIONS LOADER --------
+// -------- MISC (misc.json, optional) --------
+
+async function loadMisc() {
+    const data = await fetchJsonSafe("info/misc.json");
+    if (!data) return;
+
+    if (data.footerNote) {
+        const footerNoteEl = document.getElementById("footer-note");
+        if (footerNoteEl) {
+            footerNoteEl.textContent = data.footerNote;
+        }
+    }
+}
+
+// -------- PUBLICATIONS (publications.json + pub_extras.json) --------
 
 async function loadPublications() {
-    let pubs;
-    try {
-        const res = await fetch("publications.json");
-        if (!res.ok) {
-            throw new Error("publications.json HTTP " + res.status);
-        }
-        pubs = await res.json();
-    } catch (err) {
-        console.error("Error loading publications.json:", err);
+    // Load both base publications and extras in parallel
+    const [pubs, extrasData] = await Promise.all([
+        fetchJsonSafe("info/publications.json"),
+        fetchJsonSafe("info/pub_extras.json"),
+    ]);
+
+    if (!Array.isArray(pubs)) {
         const listEl = document.getElementById("pub-list");
         if (listEl) {
             listEl.innerHTML =
                 '<div class="text-muted">No publications loaded. Check <code>publications.json</code>.</div>';
         }
         return;
+    }
+
+    // Build extras map by normalized title
+    const extrasMap = {};
+    if (extrasData && Array.isArray(extrasData.extras)) {
+        extrasData.extras.forEach(function (entry) {
+            if (entry && entry.title) {
+                extrasMap[titleKey(entry.title)] = entry;
+            }
+        });
     }
 
     // Sort by year descending
@@ -330,6 +369,16 @@ async function loadPublications() {
 
     pubs.forEach(function (pub) {
         const links = pub.links || {};
+        const key = titleKey(pub.title);
+        const extras = extrasMap[key] || {};
+
+        const imgPath = extras.image || "";
+        const projectUrl = extras.project || "";
+        const codeUrl = extras.code || "";
+
+        const pdfUrl = links.pdf || "";
+        const doiUrl = links.doi || "";
+        const paperUrl = links.scholar || ""; // Scholar link, but label "Paper"
 
         const card = document.createElement("div");
         card.className = "pub-card";
@@ -347,7 +396,7 @@ async function loadPublications() {
         const metaPieces = [];
 
         if (pub.authors) {
-            metaPieces.push(formatAuthors(pub.authors)); // returns HTML
+            metaPieces.push(formatAuthors(pub.authors)); // HTML with <strong>
         }
         if (pub.venue) {
             metaPieces.push(pub.venue);
@@ -359,8 +408,7 @@ async function loadPublications() {
         metaEl.innerHTML = metaPieces.join(" · ");
         card.appendChild(metaEl);
 
-        // Optional big image UNDER title/meta
-        const imgPath = getPubImage(pub.title);
+        // Optional big image under title/meta
         if (imgPath) {
             const imgWrap = document.createElement("div");
             imgWrap.className = "pub-card-image-block";
@@ -375,12 +423,11 @@ async function loadPublications() {
             card.appendChild(imgWrap);
         }
 
-        // Chips for links (PDF / Code / DOI / Scholar...)
+        // Pills: Project / Code / PDF / DOI / Paper
         const chipsWrap = document.createElement("div");
         chipsWrap.className = "pub-card-chips";
 
-        function addChip(label, key) {
-            const url = links[key];
+        function addChip(label, url) {
             if (!url) return;
             const a = document.createElement("a");
             a.className = "pub-chip";
@@ -391,18 +438,21 @@ async function loadPublications() {
             chipsWrap.appendChild(a);
         }
 
-        addChip("PDF", "pdf");
-        addChip("Code", "code");
-        addChip("DOI", "doi");
-        addChip("Scholar", "scholar");
+        addChip("Project", projectUrl); // from extras
+        addChip("Code", codeUrl); // from extras
+        addChip("PDF", pdfUrl);
+        addChip("DOI", doiUrl);
+        addChip("Paper", paperUrl); // scholar link, nicer label
 
         if (chipsWrap.children.length) {
             card.appendChild(chipsWrap);
         }
 
-        // Make the whole card clickable if we have a "primary" URL
+        // Whole card clickable:
+        // prefer Project → PDF → Paper → Code → DOI
         const primaryUrl =
-            links.pdf || links.doi || links.scholar || links.code || "";
+            projectUrl || pdfUrl || paperUrl || codeUrl || doiUrl;
+
         if (primaryUrl) {
             card.classList.add("pub-card-clickable");
             card.addEventListener("click", function (e) {
@@ -418,6 +468,10 @@ async function loadPublications() {
 // -------- BOOTSTRAP --------
 
 document.addEventListener("DOMContentLoaded", function () {
-    loadConfig();
+    loadPersonalInfo();
+    loadSocialLinks();
+    loadNews();
+    loadActivities();
+    loadMisc();
     loadPublications();
 });

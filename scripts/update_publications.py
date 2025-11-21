@@ -77,7 +77,7 @@ def fetch_publications(user_id: str, max_papers: int = 40):
 def main():
     pubs = fetch_publications(SCHOLAR_USER_ID, MAX_PAPERS)
 
-    out_path = Path("publications.json")
+    out_path = Path("info/publications.json")
     out_path.write_text(
         json.dumps(pubs, ensure_ascii=False, indent=2),
         encoding="utf-8",

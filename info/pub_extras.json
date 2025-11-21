@@ -1,0 +1,22 @@
+{
+    "extras": [
+        {
+            "title": "Automated Detection of Visual Attribute Reliance with a Self-Reflective Agent",
+            "image": "assets/papers/saia.png",
+            "project": "https://christykl.github.io/saia-website/",
+            "code": "https://github.com/christykl/saia"
+        },
+        {
+            "title": "Experimenting with Affective Computing Models in Video Interviews with Spanish-Speaking Older Adults",
+            "image": "assets/papers/elder.png",
+            "project": "",
+            "code": ""
+        },
+        {
+            "title": "OpenMAIA: a Multimodal Automated Interpretability Agent based on open-source models",
+            "image": "assets/papers/openmaia.png",
+            "project": "",
+            "code": "https://github.com/multimodal-interpretability/maia"
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "news": [
+        {
+            "label": "2025.11",
+            "text": "Currently looking for research internships in industry for Spring or Summer 2026.",
+            "url": ""
+        },
+        {
+            "label": "2025.09",
+            "text": "2 Papers Accepted at NeurIPS 2025: Main Track & Mechanistic Interpretability Workshop",
+            "url": ""
+        },
+        {
+            "label": "2025.02",
+            "text": "Visiting Researcher at Northeastern University & MIT CSAIL.",
+            "url": ""
+        },
+        {
+            "label": "2024.12",
+            "text": "1 Paper Accepted at WACV 2025: 2nd Workshop on Computer Vision with Small Data.",
+            "url": ""
+        },
+        {
+            "label": "2024.04",
+            "text": "Visiting Researcher at Northeastern University.",
+            "url": ""
+        },
+        {
+            "label": "2023.07",
+            "text": "Attended DeepLearn 2023 Summer 10th International Gran Canaria Summer School on Deep Learning.",
+            "url": "https://deeplearn.irdta.eu/2023su/"
+        }
+    ]
+}

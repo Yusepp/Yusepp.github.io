@@ -1,0 +1,41 @@
+[
+    {
+        "title": "Automated Detection of Visual Attribute Reliance with a Self-Reflective Agent",
+        "authors": "Christy Li and Josep Lopez Camuñas and Jake Thomas Touchet and Jacob Andreas and Agata Lapedriza and Antonio Torralba and Tamar Rott Shaham",
+        "venue": "arXiv preprint arXiv:2510.21704",
+        "year": 2025,
+        "summary": "When a vision model performs image recognition, which visual attributes drive its predictions? Detecting unintended reliance on specific visual features is critical for ensuring model robustness, preventing overfitting, and avoiding spurious correlations. We introduce an automated framework for detecting such dependencies in trained vision models. ",
+        "links": {
+            "pdf": "",
+            "doi": "",
+            "code": "",
+            "scholar": "https://arxiv.org/abs/2510.21704"
+        }
+    },
+    {
+        "title": "Experimenting with Affective Computing Models in Video Interviews with Spanish-Speaking Older Adults",
+        "authors": "Josep López Camuñas and Cristina Bustos and Yanjun Zhu and Raquel Ros and Agata Lapedriza",
+        "venue": "Proceedings of the Winter Conference on Applications of Computer Vision",
+        "year": 2025,
+        "summary": "Understanding emotional signals in older adults is crucial for designing virtual assistants that support their well-being. However existing affective computing models often face significant limitations:(1) limited availability of datasets representing older adults especially in non-English-speaking populations and (2) poor generalization of models ",
+        "links": {
+            "pdf": "",
+            "doi": "",
+            "code": "",
+            "scholar": "https://openaccess.thecvf.com/content/WACV2025W/CV4Small/html/Camunas_Experimenting_with_Affective_Computing_Models_in_Video_Interviews_with_Spanish-speaking_WACVW_2025_paper.html"
+        }
+    },
+    {
+        "title": "OpenMAIA: a Multimodal Automated Interpretability Agent based on open-source models",
+        "authors": "Josep Lopez Camuñas and Christy Li and Tamar Rott Shaham and Antonio Torralba and Agata Lapedriza",
+        "venue": "Mechanistic Interpretability Workshop at NeurIPS 2025",
+        "year": null,
+        "summary": "Interpreting the internal mechanisms of large neural networks remains a main challenge for trustworthy AI. Recent works such as MAIA (a Multimodal Automated Interpretability Agent) have shown that agent-based systems can iteratively generate and test hypotheses about neuron function without the need for human intervention, which offers a scalable s",
+        "links": {
+            "pdf": "",
+            "doi": "",
+            "code": "",
+            "scholar": "https://openreview.net/forum?id=KitDRi76It"
+        }
+    }
+]

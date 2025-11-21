@@ -1,30 +1,333 @@
----
-layout: default
-title : Homepage
-navbar_title: Home
----
-{% include widgets/profile_card.html %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Your Name – Research Homepage</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="description"
+            content="PhD student in computer vision, affective computing, and social robotics at UOC in Barcelona, collaborating with MIT and Northeastern University."
+        />
 
-{% include widgets/debug_repo_name.html %}
+        <!-- Bootstrap 5 CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+        />
 
-{% include widgets/debug_url.html %}
+        <!-- Fonts: Press Start 2P for UI, Share Tech Mono for body -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap"
+            rel="stylesheet"
+        />
 
-{% if site.data.display.homepage.show_experience %}
-    {% include widgets/experience_card.html %}
-{% endif %}
+        <!-- Custom styles -->
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body class="bg-body-custom">
+        <div class="d-flex flex-column min-vh-100">
+            <main class="flex-grow-1">
+                <div class="container-xxl py-4">
+                    <div class="row g-4">
+                        <!-- Sidebar / Profile -->
+                        <aside class="col-12 col-md-4 col-lg-4">
+                            <div
+                                class="card sidebar-card shadow-soft sticky-top"
+                            >
+                                <div class="card-body">
+                                    <div class="profile-header mb-3">
+                                        <div
+                                            id="profile-photo-wrapper"
+                                            class="profile-photo-wrapper mb-2"
+                                        >
+                                            <img
+                                                id="profile-photo"
+                                                class="profile-photo"
+                                                alt="Profile photo"
+                                            />
+                                            <div
+                                                id="profile-avatar-fallback"
+                                                class="profile-avatar-fallback"
+                                            >
+                                                YN
+                                            </div>
+                                        </div>
+                                        <h1
+                                            id="profile-name"
+                                            class="profile-name"
+                                        >
+                                            Your Name
+                                        </h1>
+                                        <div
+                                            id="profile-title"
+                                            class="profile-title"
+                                        >
+                                            PhD Student in ...
+                                        </div>
+                                        <div
+                                            id="profile-affiliation"
+                                            class="profile-affiliation"
+                                        >
+                                            UOC, Barcelona
+                                        </div>
+                                        <div
+                                            id="profile-location"
+                                            class="profile-location"
+                                        >
+                                            Barcelona, Spain
+                                        </div>
+                                    </div>
 
-{% if site.data.display.homepage.show_news %}
-    {% assign count_news = site.news | size %}
-    {% if count_news > 0 %}
-        {% include widgets/news_card.html limit=site.data.display.homepage.num_news %}
-    {% endif %}
-{% endif %}
+                                    <div class="mb-3">
+                                        <div class="section-label">Contact</div>
+                                        <div
+                                            id="profile-email-primary"
+                                            class="profile-text"
+                                        ></div>
+                                        <div
+                                            id="profile-email-secondary"
+                                            class="profile-text mt-1"
+                                        ></div>
+                                    </div>
 
-{% if site.data.display.homepage.show_selected_publications %}
-    {% assign pubs = site.publications | sort: "date" | reverse | where: "selected", true %}
-    {% 
-        include widgets/publication_card.html 
-        publications=pubs
-        title='<i class="fas fa-star"></i> Selected Publications'
-    %}
-{% endif %}
+                                    <div class="mb-3">
+                                        <div class="section-label">Online</div>
+                                        <div
+                                            id="profile-links"
+                                            class="d-flex flex-wrap gap-2 mt-1 justify-content-center"
+                                        ></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="section-label">
+                                            Research Interests
+                                        </div>
+                                        <div
+                                            id="research-topics"
+                                            class="research-topics mt-1"
+                                        ></div>
+                                    </div>
+
+                                    <div
+                                        id="internship-block"
+                                        class="mb-3 d-none"
+                                    >
+                                        <div class="section-label">
+                                            Internships
+                                        </div>
+                                        <div
+                                            id="internship-note"
+                                            class="internship-note mt-1"
+                                        ></div>
+                                    </div>
+
+                                    <div id="cv-block" class="mb-1 d-none">
+                                        <div class="section-label">CV</div>
+                                        <div class="profile-text mt-1">
+                                            <a
+                                                id="cv-link"
+                                                href="cv.pdf"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                Download CV (PDF)
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+
+                        <!-- Main content -->
+                        <div class="col-12 col-md-8 col-lg-8">
+                            <!-- Top section nav -->
+                            <nav class="card card-section sections-card mb-3">
+                                <div
+                                    class="card-body py-2 d-flex align-items-center gap-3 sections-nav"
+                                >
+                                    <div class="sections-label">Sections</div>
+                                    <div class="nav nav-pills flex-nowrap">
+                                        <a
+                                            class="nav-link nav-link-compact"
+                                            href="#about"
+                                            >About</a
+                                        >
+                                        <a
+                                            class="nav-link nav-link-compact"
+                                            href="#news"
+                                            >News</a
+                                        >
+                                        <a
+                                            class="nav-link nav-link-compact"
+                                            href="#publications"
+                                            >Publications</a
+                                        >
+                                        <a
+                                            class="nav-link nav-link-compact"
+                                            href="#teaching"
+                                            >Teaching</a
+                                        >
+                                        <a
+                                            class="nav-link nav-link-compact"
+                                            href="#honors"
+                                            >Honors &amp; Awards</a
+                                        >
+                                        <a
+                                            class="nav-link nav-link-compact"
+                                            href="#service"
+                                            >Service</a
+                                        >
+                                    </div>
+                                </div>
+                            </nav>
+
+                            <!-- About -->
+                            <section id="about" class="card card-section mb-3">
+                                <div class="card-body">
+                                    <h2 class="section-title mb-1">About Me</h2>
+                                    <p class="section-subtitle">
+                                        Short Bio
+                                    </p>
+                                    <div class="section-body" id="about-body">
+                                        <!-- Fallback text if personal_info.json doesn't define aboutParagraphs -->
+                                        <p>
+                                            I am a PhD student at the
+                                            <strong
+                                                >Universitat Oberta de Catalunya
+                                                (UOC)</strong
+                                            >
+                                            in Barcelona, working at the
+                                            intersection of
+                                            <strong>computer vision</strong>,
+                                            <strong>affective computing</strong
+                                            >, and
+                                            <strong>social robotics</strong>.
+                                        </p>
+                                        <p>
+                                            My research explores how intelligent
+                                            systems can perceive and respond to
+                                            human affect in real-world
+                                            human–robot interaction scenarios. I
+                                            collaborate closely with researchers
+                                            at
+                                            <strong>MIT</strong> and
+                                            <strong
+                                                >Northeastern University</strong
+                                            >, with applications spanning
+                                            education, healthcare, and everyday
+                                            human–robot collaboration.
+                                        </p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- News -->
+                            <section id="news" class="card card-section mb-3">
+                                <div class="card-body">
+                                    <h2 class="section-title mb-1">News</h2>
+                                    <p class="section-subtitle">
+                                        Recent updates, internships, and
+                                        publication announcements.
+                                    </p>
+                                    <ul
+                                        id="news-list"
+                                        class="list-unstyled section-list"
+                                    >
+                                        <!-- Filled by JS -->
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <!-- Publications -->
+                            <section
+                                id="publications"
+                                class="card card-section mb-3"
+                            >
+                                <div class="card-body">
+                                    <h2 class="section-title mb-1">
+                                        Selected Publications
+                                    </h2>
+                                    <p class="section-subtitle">
+                                        Automatically scraped from Google Scholar.
+                                    </p>
+                                    <div id="pub-list" class="pub-list-cards">
+                                        <!-- Filled by JS -->
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Teaching -->
+                            <section
+                                id="teaching"
+                                class="card card-section mb-3"
+                            >
+                                <div class="card-body">
+                                    <h2 class="section-title mb-1">Teaching</h2>
+                                    <p class="section-subtitle">
+                                        Courses and teaching activities.
+                                    </p>
+                                    <ul id="teaching-list" class="section-list">
+                                        <!-- Filled by JS -->
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <!-- Honors & Awards -->
+                            <section id="honors" class="card card-section mb-3">
+                                <div class="card-body">
+                                    <h2 class="section-title mb-1">
+                                        Honors and Awards
+                                    </h2>
+                                    <ul id="awards-list" class="section-list">
+                                        <!-- Filled by JS -->
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <!-- Service -->
+                            <section
+                                id="service"
+                                class="card card-section mb-3"
+                            >
+                                <div class="card-body">
+                                    <h2 class="section-title mb-1">Service</h2>
+                                    <ul id="service-list" class="section-list">
+                                        <!-- Filled by JS -->
+                                    </ul>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="border-top py-3 footer-text">
+                <div
+                    class="container-xxl d-flex flex-wrap justify-content-between gap-2"
+                >
+                    <div>
+                        © <span id="footer-year"></span>
+                        <span id="footer-name">Your Name</span>
+                    </div>
+                    <div id="footer-note">
+                        Built with ♥ · Hosted on GitHub Pages
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Bootstrap JS bundle -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"
+        ></script>
+
+        <!-- App logic -->
+        <script src="main.js"></script>
+    </body>
+</html>

@@ -1,0 +1,456 @@
+:root {
+    --accent: #005eff;
+    --accent-soft: rgba(0, 94, 255, 0.08);
+    --border-strong: #111827;
+    --border-soft: #d4d4d8;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --bg-body: #eef2ff;
+    --bg-card: #fdfdfd;
+}
+
+/* ---------- Global ---------- */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    color: var(--text-main);
+    font-family:
+        "Share Tech Mono",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Text",
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+    font-size: 1rem; /* base reading size */
+    line-height: 1.55;
+}
+
+/* subtle grid background */
+.bg-body-custom {
+    background-color: var(--bg-body);
+    background-image:
+        linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+    background-size: 12px 12px;
+}
+
+.container-xxl {
+    max-width: 1320px;
+}
+
+/* Links: classic blue */
+a {
+    color: #0645ad;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Cards / "windows" ---------- */
+
+.sidebar-card {
+    border-radius: 6px;
+    border: 2px solid var(--border-strong);
+    background: var(--bg-card);
+    box-shadow:
+        0 0 0 1px #ffffff,
+        4px 4px 0 rgba(15, 23, 42, 0.55);
+}
+
+.shadow-soft {
+    box-shadow:
+        0 0 0 1px #ffffff,
+        4px 4px 0 rgba(15, 23, 42, 0.55);
+}
+
+.card-section {
+    border-radius: 6px;
+    border: 2px solid var(--border-strong);
+    background: var(--bg-card);
+    box-shadow:
+        0 0 0 1px #ffffff,
+        3px 3px 0 rgba(15, 23, 42, 0.45);
+    transition:
+        transform 0.08s ease-out,
+        box-shadow 0.08s ease-out,
+        border-color 0.08s ease-out;
+}
+
+@media (min-width: 992px) {
+    .card-section:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 0 0 1px #ffffff,
+            5px 5px 0 rgba(15, 23, 42, 0.6);
+        border-color: #020617;
+    }
+}
+
+/* ---------- Sidebar profile ---------- */
+
+.sidebar-card .card-body {
+    text-align: center;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-photo-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    border: 2px solid var(--border-strong);
+    box-shadow:
+        0 0 0 1px #ffffff,
+        3px 3px 0 rgba(15, 23, 42, 0.6);
+}
+
+.profile-photo,
+.profile-avatar-fallback {
+    width: 210px;
+    height: 210px;
+}
+
+@media (max-width: 576px) {
+    .profile-photo,
+    .profile-avatar-fallback {
+        width: 170px;
+        height: 170px;
+    }
+}
+
+.profile-photo {
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid #9ca3af;
+    background: #e5e7eb;
+}
+
+.profile-avatar-fallback {
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    background: radial-gradient(circle at 30% 20%, #93c5fd, #2563eb);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #fff;
+    image-rendering: pixelated;
+}
+
+/* Sidebar text hierarchy */
+
+.profile-name {
+    margin-bottom: 0.25rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.profile-title {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+}
+
+.profile-affiliation {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.1rem;
+}
+
+.profile-location {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.profile-text {
+    font-size: 0.9rem;
+}
+
+/* ---------- Section labels ---------- */
+
+.section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    font-family: "Press Start 2P", system-ui, monospace;
+    text-align: left;
+}
+
+/* ---------- Link chips & research interests ---------- */
+
+.profile-chip {
+    font-size: 0.7rem;
+    padding: 0.18rem 0.6rem;
+    border-radius: 3px;
+    border: 1px solid var(--border-strong);
+    background: #f5f5f5;
+    color: var(--text-main);
+    white-space: nowrap;
+    font-family: "Press Start 2P", system-ui, monospace;
+    text-transform: uppercase;
+}
+
+.profile-chip:hover {
+    background: #e5e7eb;
+    text-decoration: none;
+}
+
+.research-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.4rem;
+    justify-content: flex-start;
+}
+
+.research-topics span {
+    display: inline-flex;
+    align-items: center;
+    white-space: normal;
+    max-width: 100%;
+    word-break: break-word;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    border: 1px solid var(--border-strong);
+    background: #fefce8;
+    color: #4b5563;
+    font-family: "Press Start 2P", system-ui, monospace;
+}
+
+/* ---------- Internship note ---------- */
+
+.internship-note {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.7rem;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    border: 2px dashed var(--accent);
+    color: #111827;
+    text-align: left;
+}
+
+/* ---------- Section headings & body ---------- */
+
+.section-title {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-family: "Press Start 2P", system-ui, monospace;
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+}
+
+.section-subtitle {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    font-style: italic;
+}
+
+.section-body p {
+    font-size: 0.98rem;
+    margin-bottom: 0.6rem;
+}
+
+.section-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* shared list styling for JS lists (news, teaching, awards, service) */
+.section-list {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 0.92rem;
+}
+
+/* ---------- News / teaching labels ---------- */
+
+.news-date,
+.teaching-term {
+    font-weight: 600;
+    margin-right: 0.35rem;
+    white-space: nowrap;
+    font-family: "Press Start 2P", system-ui, monospace;
+    font-size: 0.65rem;
+}
+
+/* ---------- Publications ---------- */
+
+.pub-list-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pub-card {
+    border-radius: 4px;
+    border: 2px solid var(--border-strong);
+    background: #f8fafc;
+    padding: 0.65rem 0.75rem;
+    transition:
+        box-shadow 0.08s ease-out,
+        transform 0.08s ease-out,
+        border-color 0.08s ease-out,
+        background-color 0.08s ease-out;
+}
+
+.pub-card-clickable {
+    cursor: pointer;
+}
+
+.pub-card-clickable:hover {
+    background: #ffffff;
+    border-color: #020617;
+    box-shadow:
+        0 0 0 1px #ffffff,
+        3px 3px 0 rgba(15, 23, 42, 0.55);
+    transform: translateY(-1px);
+}
+
+.pub-card-title {
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    font-size: 0.98rem;
+}
+
+.pub-card-meta {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.pub-card-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.35rem;
+}
+
+.pub-chip {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 3px;
+    border: 1px solid var(--border-strong);
+    background: #e0f2fe;
+    color: var(--text-main);
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: "Press Start 2P", system-ui, monospace;
+    text-transform: uppercase;
+}
+
+.pub-chip:hover {
+    background: #bfdbfe;
+    text-decoration: none;
+}
+
+/* layout for optional publication thumbnail */
+.pub-card-image-block {
+    margin-top: 0.5rem;
+    margin-bottom: 0.4rem;
+    text-align: center; /* center images that don't use full width */
+}
+
+.pub-card-image {
+    display: inline-block;
+    max-width: 100%; /* never overflow horizontally */
+    height: auto; /* scale height proportionally */
+    border-radius: 4px;
+    border: 1px solid var(--border-strong);
+    background: #e5e7eb;
+}
+
+/* ---------- Sections nav ---------- */
+
+.sections-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.sections-nav::-webkit-scrollbar {
+    height: 4px;
+}
+
+.sections-nav::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 999px;
+}
+
+.sections-card {
+    border-radius: 999px;
+    border: 2px solid var(--border-strong);
+    background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 70%, #9ca3af 100%);
+    box-shadow:
+        0 0 0 1px #ffffff,
+        3px 3px 0 rgba(15, 23, 42, 0.5);
+}
+
+.sections-label {
+    font-size: 0.7rem;
+    font-family: "Press Start 2P", system-ui, monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #4b5563;
+}
+
+.nav-link-compact {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    border-radius: 999px;
+    color: #1f2937;
+    font-family: "Press Start 2P", system-ui, monospace;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.nav-link-compact:hover {
+    color: #020617;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-color: var(--border-strong);
+}
+
+.nav-link-compact.active {
+    background-color: #ffffff;
+    border-color: var(--border-strong);
+    box-shadow:
+        0 0 0 1px #e5e7eb,
+        2px 2px 0 rgba(15, 23, 42, 0.4);
+}
+
+/* ---------- Footer ---------- */
+
+.footer-text {
+    background: transparent;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* ---------- Small screen tweaks ---------- */
+
+@media (max-width: 576px) {
+    .sidebar-card {
+        box-shadow:
+            0 0 0 1px #ffffff,
+            4px 4px 0 rgba(15, 23, 42, 0.6);
+    }
+}

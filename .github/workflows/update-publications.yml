@@ -10,6 +10,8 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: write
+        outputs:
+            changed: ${{ steps.commit.outputs.changed }}
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
@@ -18,21 +20,34 @@ jobs:
               uses: actions/setup-python@v5
               with:
                   python-version: "3.11"
+                  cache: pip
 
             - name: Install dependencies
-              run: pip install scholarly
+              run: pip install -r requirements.txt
 
-            - name: Update publications.json from Google Scholar
+            - name: Merge Google Scholar results into info/publications.json
               run: python scripts/update_publications.py
 
             - name: Commit and push if changed
+              id: commit
               run: |
-                  if [[ -n "$(git status --porcelain publications.json)" ]]; then
+                  if [[ -n "$(git status --porcelain info/publications.json)" ]]; then
                     git config user.name "github-actions[bot]"
                     git config user.email "github-actions[bot]@users.noreply.github.com"
-                    git add publications.json
+                    git add info/publications.json
                     git commit -m "Update publications from Google Scholar"
                     git push
+                    echo "changed=true" >> "$GITHUB_OUTPUT"
                   else
                     echo "No changes to commit."
                   fi
+
+    # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy explicitly.
+    deploy:
+        needs: update-pubs
+        if: needs.update-pubs.outputs.changed == 'true'
+        uses: ./.github/workflows/deploy.yml
+        permissions:
+            contents: read
+            pages: write
+            id-token: write

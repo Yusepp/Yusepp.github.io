@@ -1,0 +1,818 @@
+{
+  "slug": "peqemo",
+  "short": "PeqEMO",
+  "title": "Semantic Justifications for Multiple Interpretations of Visual Emotion Perception with Open Vocabulary",
+  "tagline": "Not just which emotion, but what's in the image and why it feels that way, for any emotion you ask about.",
+  "description": "PeqEMO is a family of compact vision-language models that predict an image's emotion and justify it through a Perception → Trigger → Label process, with open-vocabulary and conditioned interpretations.",
+  "authors": [
+    {
+      "name": "Anonymous Author(s)",
+      "url": "",
+      "affiliations": []
+    }
+  ],
+  "affiliations": [],
+  "venue": "NeurIPS 2026 submission",
+  "links": [
+    {
+      "label": "Paper",
+      "icon": "pdf",
+      "url": ""
+    },
+    {
+      "label": "arXiv",
+      "icon": "arxiv",
+      "url": ""
+    },
+    {
+      "label": "Code",
+      "icon": "code",
+      "url": ""
+    },
+    {
+      "label": "Dataset",
+      "icon": "data",
+      "url": ""
+    },
+    {
+      "label": "Models",
+      "icon": "model",
+      "url": ""
+    }
+  ],
+  "teaser": "teaser",
+  "tldr": "PeqEMO doesn't just label an image's emotion. It explains <b>what it sees</b> and <b>why that feels a certain way</b>, and it can argue for <b>several different emotions</b> for the same image, each grounded in the picture.",
+  "media": {
+    "teaser": {
+      "file": "teaser.mp4",
+      "kind": "video",
+      "aspect": "16/9",
+      "caption": "PeqEMO reads an image the way a person might: what it sees, why that feels a certain way, and which emotion follows.",
+      "todo": "10–15 s loop: an image appears, then the Perception, Trigger and Label paragraphs type out one after another."
+    },
+    "problem": {
+      "file": "problem.png",
+      "kind": "image",
+      "aspect": "16/7",
+      "caption": "The same photo can support several emotional readings.",
+      "todo": "One photo surrounded by 3–4 plausible emotion tags (e.g. awe, fear, excitement), each with the visual cue that supports it."
+    },
+    "framework": {
+      "file": "framework.png",
+      "kind": "image",
+      "aspect": "16/7",
+      "caption": "PeqEMO framework: a vision encoder and projector feed Qwen3-VL (LoRA-tuned), which returns a label plus a structured justification.",
+      "todo": "Figure 1 of the paper (framework overview)."
+    },
+    "howitworks": {
+      "file": "perception-trigger-label.gif",
+      "kind": "gif",
+      "aspect": "16/9",
+      "caption": "Perception → Trigger → Label, step by step.",
+      "todo": "Animation: highlight the image regions mentioned in Perception, then draw arrows from those cues to the Trigger sentences, then reveal the Label."
+    },
+    "dataset": {
+      "file": "dataset-pipeline.png",
+      "kind": "image",
+      "aspect": "16/7",
+      "caption": "Building VIA-EmoSET: EmoSet images are annotated by GLM-4.6V with Perception, Trigger and Label.",
+      "todo": "Figure 2 of the paper (VIA-EmoSET construction pipeline)."
+    },
+    "emoloss": {
+      "file": "emo-loss.gif",
+      "kind": "gif",
+      "aspect": "16/7",
+      "caption": "Label dilution: the answer is a tiny fraction of the tokens. Emo-Loss turns its weight up.",
+      "todo": "Animation: a long justification with the 1–3 label tokens highlighted; a bar showing the label’s share of the training signal grows from ~1–2% to ~50% as λ goes from 1 to 30."
+    },
+    "explore-pansies": {
+      "file": "explore-pansies.jpg",
+      "kind": "image",
+      "aspect": "4/3",
+      "caption": "",
+      "todo": "Appendix F image: a dense cluster of purple and orange pansies."
+    },
+    "explore-interior": {
+      "file": "explore-interior.jpg",
+      "kind": "image",
+      "aspect": "673/1024",
+      "caption": "",
+      "todo": "Appendix F image: an abandoned room with light streaming through ornate doors."
+    },
+    "explore-monkey": {
+      "file": "explore-monkey.jpg",
+      "kind": "image",
+      "aspect": "3/2",
+      "caption": "",
+      "todo": "Appendix F image: a black-and-white photo of a primate sitting behind a chain-link fence."
+    },
+    "explore-team": {
+      "file": "explore-team.jpg",
+      "kind": "image",
+      "aspect": "3/2",
+      "caption": "",
+      "todo": "Appendix F image: three men in orange “team” t-shirts outdoors."
+    },
+    "success-couple": {
+      "file": "success-couple.jpg",
+      "kind": "image",
+      "aspect": "4/3",
+      "caption": "",
+      "todo": "Figure 4 (left): a couple walking hand in hand at a tropical resort."
+    },
+    "success-dogs": {
+      "file": "success-dogs.jpg",
+      "kind": "image",
+      "aspect": "4/3",
+      "caption": "",
+      "todo": "Figure 4 (right): two dogs fighting, teeth bared."
+    },
+    "failure-dinosaur": {
+      "file": "failure-dinosaur.jpg",
+      "kind": "image",
+      "aspect": "4/3",
+      "caption": "",
+      "todo": "Figure 5: a dinosaur model with its mouth wide open."
+    },
+    "failure-grid": {
+      "file": "failure-grid.jpg",
+      "kind": "image",
+      "aspect": "4/3",
+      "caption": "",
+      "todo": "Figure 5: figures with raised hands under cool blue lighting and glowing grids."
+    },
+    "failure-clown": {
+      "file": "failure-clown.jpg",
+      "kind": "image",
+      "aspect": "4/3",
+      "caption": "",
+      "todo": "Figure 5: a clown at a theme park."
+    }
+  },
+  "explorer": [
+    {
+      "id": "pansies",
+      "label": "Pansies",
+      "media": "explore-pansies",
+      "alt": "A dense cluster of purple and orange pansies",
+      "groundTruth": "Amusement",
+      "justifications": [
+        {
+          "emotion": "Amusement",
+          "perception": "The image displays a dense cluster of vibrant pansy flowers with petals in rich purple and bright orange-yellow hues, set against a backdrop of lush green foliage. The flowers are arranged closely together, creating a textured, colorful composition that fills the frame, with some blooms in sharp focus while others softly blur into the background. The lighting appears natural and bright, enhancing the vividness of the colors and giving the scene a lively, fresh quality. The overall visual effect is one of abundant, cheerful floral abundance, with the contrasting colors and dense arrangement drawing attention to the intricate details of the petals and the natural beauty of the garden setting.",
+          "trigger": "The vibrant, contrasting colors of the purple and orange-yellow petals create a visually striking and playful effect that naturally draws attention and elicits a sense of delight. The dense, abundant arrangement of the flowers, with their varied shapes and bright hues, gives the impression of a lively, almost whimsical garden scene that can make viewers feel lighthearted and amused. The natural, bright lighting enhances the vividness of the colors, making the scene feel fresh and energetic, which contributes to a cheerful and amusing emotional response."
+        },
+        {
+          "emotion": "Anger",
+          "perception": "The image displays a dense cluster of vibrant purple and orange flowers with green foliage, arranged in a tightly packed composition that fills the frame. The flowers feature prominent, contrasting colors—deep purple petals with bright orange centers—set against a background of lush green leaves and stems, creating a visually busy and saturated scene. The lighting appears bright and even, highlighting the vivid hues and intricate details of the petals, while the overall arrangement suggests a natural, outdoor setting with no visible human subjects or contextual elements beyond the floral display.",
+          "trigger": "The intense, saturated colors of the flowers, particularly the deep purple and bright orange can trigger a psychological response of heightened arousal, as such vivid contrasts are often associated with strong visual stimuli. The dense, tightly packed arrangement of the flowers creates a sense of overwhelming visual clutter, which may lead to feelings of irritation or frustration, as the eye struggles to process the abundance of competing visual elements. The bright, even lighting that emphasizes these colors further amplifies their intensity, potentially evoking a sense of being overwhelmed or agitated by the sheer force of the visual display."
+        },
+        {
+          "emotion": "Awe",
+          "perception": "The image displays a dense cluster of vibrant pansies with petals in rich purple and bright orange-yellow hues, set against a backdrop of lush green foliage. The flowers are arranged closely together, creating a textured, layered composition that fills the frame, with some blooms in sharp focus while others softly blur into the background. The lighting appears natural and bright, enhancing the vividness of the colors and the delicate details of the petals. The overall scene is lively and colorful, with the contrast between the deep purples and warm oranges creating a visually striking and dynamic display of nature's beauty.",
+          "trigger": "The vibrant, contrasting colors of the pansies, rich purple and bright orange-yellow, create a visually arresting display that immediately captures attention, triggering a sense of wonder at the natural world's ability to produce such vivid and harmonious combinations. The dense, layered arrangement of the flowers, with their delicate textures and intricate petal patterns, invites closer inspection, fostering a feeling of being immersed in a miniature, living tapestry that feels both complex and beautiful. The natural, bright lighting enhances the flowers' vividness, making their colors appear almost luminous, which can evoke a sense of being in the presence of something extraordinary and awe-inspiring, as if witnessing a small, perfect ecosystem in full bloom."
+        },
+        {
+          "emotion": "Contentment",
+          "perception": "The image displays a dense cluster of vibrant pansies with petals in rich purple and bright orange-yellow hues, set against a backdrop of lush green foliage. The flowers are arranged closely together, creating a full, textured composition that fills the frame, with soft, even lighting that enhances the natural saturation of the colors without harsh shadows. The scene is outdoors, likely in a garden or flowerbed, with the green leaves providing a natural, organic contrast to the bold floral colors, and the overall composition feels balanced and harmonious.",
+          "trigger": "The vibrant, saturated colors of the pansies, particularly the warm orange-yellow and deep purple, create a visually pleasing and inviting aesthetic that naturally draws the eye and evokes a sense of comfort. The lush green foliage surrounding the flowers adds a feeling of natural abundance and vitality, which can contribute to a sense of peace and satisfaction. The soft, even lighting and the dense, harmonious arrangement of the flowers suggest a well-tended, tranquil environment, which can psychologically foster a feeling of ease and contentment."
+        },
+        {
+          "emotion": "Disgust",
+          "perception": "The image displays a dense cluster of flowers with vibrant purple and orange petals, set against a backdrop of lush green foliage. The flowers have a distinct three-petal structure, with the upper petals being a deep purple and the lower petals a bright orange, creating a striking contrast. The petals appear smooth and slightly glossy, with visible veins and a central yellowish area. The overall is tightly packed, with the flowers overlapping and filling the frame, creating a sense of abundance and density. The lighting is bright and even, highlighting the vivid colors and textures of the petals and leaves.",
+          "trigger": "The dense, tightly packed arrangement of the flowers creates a sense of overwhelming visual clutter, which can trigger a psychological response of discomfort. The vibrant, contrasting colors of the petals, particularly the deep purple and bright orange, may evoke a reaction of unease due to their intensity and the sheer number of flowers in close proximity. The smooth, glossy texture of the petals, combined with the lush green foliage, can create a feeling of being surrounded by an excessive amount of organic material, leading to a sense of revulsion. The overall abundance and density of the flowers may also contribute to a feeling of being overwhelmed, which can manifest as disgust."
+        },
+        {
+          "emotion": "Excitement",
+          "perception": "The image displays a dense cluster of vibrant pansies with petals in rich purple and bright orange-yellow hues, set against a backdrop of lush green foliage. The flowers are tightly packed, creating a visually dynamic composition with varied shapes and sizes, while the lighting appears bright and even, enhancing the vividness of the colors. The scene is filled with natural textures, including the smooth, velvety appearance of the petals and the crisp, serrated edges of the leaves, all contributing to a lively and energetic visual field.",
+          "trigger": "The vibrant contrast between the deep purple and bright orange-yellow petals immediately captures attention, as the human visual system is naturally drawn to high-contrast, saturated colors. This visual stimulation triggers a sense of energy and liveliness, as the brain processes the dynamic interplay of hues and shapes. The dense, tightly packed arrangement of the flowers creates a sense of abundance and movement, which can evoke feelings of enthusiasm and anticipation, as if the viewer is witnessing a flourishing, energetic display of nature."
+        },
+        {
+          "emotion": "Fear",
+          "perception": "The image displays a dense cluster of vibrant purple and orange flowers with green foliage, creating a visually busy and chaotic composition. The flowers are tightly packed, with overlapping petals and stems filling the frame, resulting in a sense of overwhelming visual clutter. The bright, saturated colors of the flowers contrast sharply with the darker green leaves, enhancing the intensity of the scene. The lighting appears natural and even, highlighting the vivid hues and textures of the petals, which appear smooth and slightly glossy. The overall composition lacks clear focal points, with the flowers appearing to extend infinitely in all directions, contributing to a sense of disorientation.",
+          "trigger": "The overwhelming visual clutter of tightly packed, brightly colored flowers creates a sense of sensory overload, which can trigger a primal fear response by overwhelming the brain's processing capacity. The sharp contrast between the vibrant petals and dark green leaves intensifies the visual impact, making the scene feel more intense and potentially threatening. The lack of clear focal points and the seemingly infinite extension of the flowers can evoke a feeling of being lost or trapped, as the brain fear."
+        },
+        {
+          "emotion": "Sadness",
+          "perception": "The image shows a dense cluster of pansy flowers with vibrant purple and orange petals, set against a backdrop of lush green foliage. The flowers are tightly packed, creating a rich, textured composition with varying shades of purple, orange, and green dominating the scene. The lighting appears soft and diffused, casting gentle shadows that enhance the depth of the petals and leaves, while the overall color palette is warm yet muted, with the purple and orange hues blending into the green background. The flowers are in full bloom, with some petals slightly curled at the edges, and the composition is filled with overlapping blooms, giving a sense of abundance and natural growth.",
+          "trigger": "The dense, tightly packed arrangement of the flowers creates a sense of overwhelming abundance, which can evoke feelings of being overwhelmed or burdened. The soft, diffused lighting and muted color palette, while visually appealing, may contribute to a somber or melancholic atmosphere, as the lack of harsh contrast can make the scene feel subdued. The slightly curled edges of some petals and the natural, unstructured growth of the flowers might suggest imperfection or the passage of time, which can trigger a sense of loss or nostalgia. These elements together create an emotional implication of sadness, as the scene's richness and natural beauty are paired with subtle signs of decay or the inevitable end of life."
+        }
+      ]
+    },
+    {
+      "id": "interior",
+      "label": "Abandoned interior",
+      "media": "explore-interior",
+      "alt": "An abandoned room with light streaming through ornate doors",
+      "groundTruth": "Fear",
+      "justifications": [
+        {
+          "emotion": "Amusement",
+          "perception": "The image depicts an abandoned interior space with a pair of wooden doors featuring ornate metal grilles, through which bright, warm light streams in, creating a stark contrast with the dim, shadowy surroundings. The floor is covered in a chaotic pile of crumpled papers and debris, with some items scattered near the base of the doors, suggesting neglect or disuse. The overall lighting is dramatic, with the intense light from the doors illuminating the scene while casting deep shadows, emphasizing the texture of the wooden walls and the disarray of the papers. The composition focuses on the interplay between the bright, almost theatrical light and the dark, neglected environment, highlighting the contrast between the ornate doors and the messy floor.",
+          "trigger": "The dramatic contrast between the bright, warm light streaming through the ornate doors and the dark, neglected interior creates a visually striking scene that can evoke amusement through its unexpected juxtaposition. The chaotic pile of crumpled papers and debris on the floor, combined with the formal, almost theatrical design of the doors, creates a humorous tension between the grandeur of the architecture and the disorder of the space. This visual irony, where something elegant and imposing is surrounded by mess and decay, can trigger a lighthearted reaction as viewers find the situation amusingly incongruous. The overall composition, with its stark lighting and disarray, invites viewers to appreciate the absurdity of the scene, leading to a sense of amusement at the unexpected combination of elements."
+        },
+        {
+          "emotion": "Anger",
+          "perception": "The image depicts a dimly lit, abandoned interior space with a pair of wooden doors featuring ornate metal grilles, through which bright, warm light streams in, creating strong contrast between the illuminated doorways and the dark, shadowy surroundings. The floor is covered in a chaotic pile of crumpled papers, scattered documents, and debris, with some items appearing burned or damaged, suggesting neglect or destruction. The overall scene has a gritty, unkempt quality, with the disarray of the papers and the dilapidated state of the room contributing to a sense of disorder and decay.",
+          "trigger": "The chaotic pile of crumpled papers and scattered debris on the floor suggests neglect and disorder, which can trigger feelings of frustration and irritation. The strong contrast between the bright, warm light streaming through the doors and the dark, shadowy interior creates a sense of imbalance and tension, potentially evoking anger at the perceived lack of order or care. The dilapidated state of the room, with its worn and damaged elements, implies a history of abandonment or disregard, which may lead to anger at the perceived waste or disrespect for the space."
+        },
+        {
+          "emotion": "Awe",
+          "perception": "The image depicts an abandoned interior space with a pair of wooden doors featuring ornate metal grilles, through which bright, warm light streams in, creating a stark contrast with the surrounding dimness. The floor is covered in a chaotic pile of crumpled papers and debris, with the light casting long shadows and highlighting the texture of the worn wooden walls and tiled floor. The composition emphasizes the interplay between the bright, almost ethereal light filtering through the grilles and the dark, neglected environment, with the doors serving as a focal point that draws the eye toward the source of illumination.",
+          "trigger": "The interplay between the bright, warm light filtering through the ornate metal grilles and the surrounding dim, neglected space creates a sense of mystery and grandeur, as the light seems to emanate from an unseen, powerful source. This contrast between the illuminated doors and the dark, abandoned interior evokes a feeling of wonder at the beauty and complexity of the scene, as the light transforms the ordinary into something extraordinary. The chaotic pile of papers and debris, illuminated by the light, adds a layer of intrigue, suggesting a story of past activity and decay, which can inspire awe at the passage of time and the resilience of light in the face of neglect."
+        },
+        {
+          "emotion": "Contentment",
+          "perception": "The image depicts an interior space with a wooden door featuring ornate metal grilles, through which warm, golden light filters, creating a soft, diffused glow that illuminates the scene. The floor is covered with scattered papers and debris, suggesting neglect or abandonment, while the walls appear aged and worn, with visible cracks and discoloration. The lighting is warm and gentle, casting long shadows and highlighting the textures of the wood and metal, creating a sense of quiet stillness in the otherwise cluttered environment.",
+          "trigger": "The warm, golden light filtering through the ornate metal grilles creates a soft, inviting atmosphere that can evoke a sense of comfort and ease. The gentle illumination highlights the textures of the aged wood and metal, which may trigger a psychological response of appreciation for the beauty in imperfection, fostering a feeling of contentment. The quiet stillness of the scene, combined with the warm lighting, can create a sense of peaceful solitude, allowing the viewer to feel at ease and satisfied with the moment."
+        },
+        {
+          "emotion": "Disgust",
+          "perception": "The image depicts a dimly lit, abandoned interior space with a pair of wooden doors featuring ornate metal grilles, through which bright, warm light filters in, creating strong contrast with the surrounding darkness. The floor is covered in a large, disorganized pile of crumpled paper, some of which appears stained or soiled, and a small, dark, possibly organic object lies among the debris. The walls show signs of decay, with visible cracks and peeling surfaces, and the overall lighting is low, casting deep shadows that emphasize the neglected state of the environment.",
+          "trigger": "The presence of a large, disorganized pile of crumpled paper, some of which appears stained or soiled, directly triggers a psychological response related to disgust, as humans are biologically wired to react negatively to visible signs of decay or contamination. The dark, possibly organic object among the debris further amplifies this reaction, as such items are often associated with uncleanliness or decay, which can evoke a visceral sense of revulsion. The overall neglected and decaying state of the environment, with its peeling walls and dim, shadowy lighting, reinforces this feeling by creating an atmosphere of neglect and potential contamination, making the viewer more likely to experience disgust at the sight of the disarray and decay."
+        },
+        {
+          "emotion": "Excitement",
+          "perception": "The image depicts an interior space with a pair of wooden doors featuring ornate metal grilles, through which bright, warm light streams, creating a strong contrast with the dim, shadowy surroundings. The floor is covered with scattered papers, some crumpled and others lying flat, suggesting a state of disarray or recent activity. The lighting is dramatic, with the light from the doors casting long shadows and highlighting the texture of the wooden walls and the tiled floor, which appears worn and slightly damp. The overall composition emphasizes the interplay of light and shadow, with the doors serving as a focal point that draws the eye toward the source of illumination.",
+          "trigger": "The dramatic contrast between the bright, warm light streaming through the ornate metal grilles and the dim, shadowy interior creates a sense of anticipation and discovery, as if something significant is about to be revealed. The scattered papers on the floor suggest a recent event or activity, which can evoke a feeling of curiosity and excitement about what might have happened. The warm, golden hue of the light adds a sense of energy and vitality, making the scene feel dynamic and full of potential, which can heighten the emotional response of excitement."
+        },
+        {
+          "emotion": "Fear",
+          "perception": "The image depicts a dimly lit, abandoned interior space with a pair of wooden doors featuring ornate metal grilles, through which bright, warm light streams in, creating stark contrasts between illuminated and shadowed areas. The floor is covered in a chaotic pile of crumpled papers and debris, with some items appearing scorched or damaged, and the walls show signs of decay, including visible cobwebs and peeling surfaces. The overall lighting is low and uneven, with the intense light from the doors casting long shadows and highlighting the neglected, unkempt state of the room.",
+          "trigger": "The dim, uneven lighting and stark contrasts between the bright light from the doors and the dark, shadowy interior create a sense of uncertainty and unease, as the viewer cannot fully perceive the space, which can trigger a primal fear of the unknown. The chaotic pile of crumpled papers and debris, combined with the visible signs of decay such as cobwebs and peeling walls, suggests neglect and abandonment, which can evoke a fear of what might be lurking in the unseen corners of the space. The intense, warm light from the doors, while initially inviting, also highlights the desolation and disorder, making the environment feel both threatening and unsettling, as if something dangerous or unnatural might be present."
+        },
+        {
+          "emotion": "Sadness",
+          "perception": "The image depicts an abandoned interior space with a pair of wooden doors featuring ornate metal grilles, through which warm, diffused light filters into a dimly lit room. The floor is covered in a chaotic pile of crumpled papers, scattered documents, and debris, with the light creating strong contrasts between the illuminated doorway and the shadowy, neglected surroundings. The walls appear aged and worn, with visible signs of decay, and the overall composition emphasizes the emptiness and disuse of the space, with the doorway serving as a focal point that draws attention to the desolation beyond.",
+          "trigger": "The chaotic pile of crumpled papers and debris on the floor suggests neglect and abandonment, which can evoke a sense of loss or melancholy as the viewer imagines the space once held purpose or life. The strong contrast between the warm, inviting light filtering through the doorway and the dark, decaying interior creates a feeling of isolation, as if the space has been forgotten and left to decay. The aged, worn walls and the overall emptiness of the room reinforce a sense of desolation, making the viewer feel a quiet sadness at the passage of time and the loss of what once was."
+        }
+      ]
+    },
+    {
+      "id": "monkey",
+      "label": "Behind the fence",
+      "media": "explore-monkey",
+      "alt": "A black-and-white photo of a primate sitting behind a chain-link fence",
+      "groundTruth": "Sadness",
+      "justifications": [
+        {
+          "emotion": "Amusement",
+          "perception": "The image shows a black-and-white scene of a monkey sitting on the ground against a brick wall, with a chain-link fence in the foreground. The monkey is positioned in a crouched posture, with its legs drawn up and arms resting on its knees, appearing to be in a relaxed or contemplative state. The background consists of a brick wall and a patch of grass, with the chain-link fence creating a grid pattern that partially obscures the view of the monkey. The overall composition is simple, with the monkey as the central subject, and the monochromatic color scheme emphasizes the textures of the brick, grass, and metal fence.",
+          "trigger": "The monkey's relaxed, crouched posture and the way it sits with its legs drawn up and arms resting on its knees create a sense of casualness that can be perceived as endearing. The chain-link fence in the foreground, which partially obscures the monkey, adds a layer of visual interest that might make the scene feel more playful or whimsical. The black-and-white color scheme, combined with the simple composition, draws attention to the monkey's form and the textures of its surroundings, which can evoke a lighthearted, almost humorous reaction. The monkey's apparent calmness and the contrast between its relaxed state and the structured environment of the fence and brick wall might lead viewers to find the scene amusing, as it presents a charming, unexpected moment of tranquility."
+        },
+        {
+          "emotion": "Anger",
+          "perception": "The image shows a black-and-white scene of a person sitting on the ground against a brick wall, partially obscured by a chain-link fence in the foreground. The person is hunched over with their head down, wearing dark clothing, and appears to be in a confined outdoor space with sparse grass and rocks. The composition emphasizes the barrier between the viewer and the subject, with the fence creating a sense of separation and restriction. The monochromatic palette and stark lighting contribute to a somber, tense atmosphere, while the person's posture suggests a state of distress or resignation.",
+          "trigger": "The chain-link fence in the foreground creates a physical barrier that symbolizes confinement and restriction, which can trigger feelings of frustration or resentment. The person's hunched posture and downward gaze, combined with the confined space, suggest a lack of freedom or control, evoking a sense of being trapped or oppressed. The stark, monochromatic lighting and the brick wall in the background reinforce a harsh, unyielding environment, which can amplify feelings of anger by highlighting the lack of escape or relief from the situation."
+        },
+        {
+          "emotion": "Awe",
+          "perception": "The image depicts a black-and-white scene of a primate sitting on the ground against a brick wall, viewed through a chain-link fence. The primate is positioned in the lower right quadrant, with its body curled and head resting on its knees, surrounded by sparse grass and scattered rocks. The background consists of a plain brick wall and a patch of grass, with the chain-link fence creating a grid pattern that dominates the foreground. The lighting is even and diffused, casting soft shadows and emphasizing the texture of the brick, grass, and metal fence, while the monochromatic palette enhances the stark, somber atmosphere of the scene.",
+          "trigger": "The stark, monochromatic palette and the chain-link fence create a sense of confinement and isolation, which can evoke a feeling of awe by highlighting the primate's vulnerability and the harshness of its environment. The primate's curled posture and head resting on its knees suggest a state of stillness or contemplation, which, combined with the unadorned brick wall and sparse grass, emphasizes the simplicity and rawness of the scene, leading to an emotional response of awe at the primate's resilience or the starkness of its surroundings. The even, diffused lighting and the texture of the brick and metal further enhance the somber, almost monumental quality of the image, making the primate's presence feel both small and significant, which can evoke a sense of awe at the contrast between its fragility and the enduring, unyielding structures around it."
+        },
+        {
+          "emotion": "Contentment",
+          "perception": "The image shows a black-and-white scene of a person sitting on the ground against a brick wall, with a chain-link fence in the foreground. The person is in a relaxed posture, leaning against the wall with legs drawn up, and appears to be looking downward. The background consists of a brick wall and a patch of grass, with the lighting being soft and even, creating a calm and neutral atmosphere. The composition is simple, with the person positioned in the lower right corner, and the fence creating a sense of enclosure that frames the scene.",
+          "trigger": "The soft, even lighting in the image creates a calm and neutral atmosphere, which can help reduce tension and promote a sense of ease. The person's relaxed posture, with legs drawn up leaning against the wall, suggests a state of rest and comfort, which can evoke feelings of contentment. The simple composition, with the person positioned in a quiet corner, allows for a sense of peaceful solitude, further supporting the emotion of contentment."
+        },
+        {
+          "emotion": "Disgust",
+          "perception": "The image shows a black-and-white scene of a person sitting on the ground against a brick wall, viewed through a chain-link fence. The person is hunched over with their head bowed, wearing dark clothing, and appears to be in a confined outdoor space with sparse grass and rocks. The composition emphasizes the barrier of the fence, creating a sense of separation between the viewer and the subject, while the monochromatic palette and stark lighting enhance the somber, isolated atmosphere of the setting.",
+          "trigger": "The chain-link fence acts as a physical barrier, creating a sense of confinement and separation that can trigger feelings of discomfort or unease. The person's hunched posture and bowed head, combined with their dark clothing, may evoke a sense of vulnerability or distress, which can lead to a feeling of revulsion. The stark, monochromatic lighting and the confined outdoor space further contribute to an atmosphere of isolation, reinforcing the emotional implication of disgust."
+        },
+        {
+          "emotion": "Excitement",
+          "perception": "The image shows a black-and-white scene of a person sitting on the ground against a brick wall, with a chain-link fence in the foreground. The person is hunched over, with their head bowed and hands clasped near their chest, positioned in a corner of a grassy area with scattered rocks. The background consists of a brick wall and a patch of grass, with the chain-link fence creating a grid pattern that dominates the foreground. The lighting is even, with no strong shadows, and the overall composition is static, focusing on the person's posture and the surrounding environment.",
+          "trigger": "The person's hunched posture and bowed head, combined with the chain-link fence in the foreground, create a sense of confinement that can trigger a psychological response of tension or anticipation. The even lighting and static composition of the scene, with the person positioned in a corner, may evoke a feeling of suspense or curiosity about what the person is doing or thinking, leading to a heightened state of alertness. The contrast between the person's stillness and the surrounding environment, along with the fence's grid pattern, can create a sense of unease or intrigue, which may translate into a feeling of excitement as the viewer becomes more engaged with the scene."
+        },
+        {
+          "emotion": "Fear",
+          "perception": "The image shows a black-and-white scene of a primate sitting on the ground against a brick wall, viewed through a chain-link fence. The primate is positioned in a crouched posture with its head lowered, surrounded by sparse grass and rocks, with the fence creating a barrier between the viewer and the subject. The lighting is flat and even, emphasizing the stark contrast between the dark primate and the lighter background, while the chain-link fence dominates the foreground, framing the scene and creating a sense of separation.",
+          "trigger": "The chain-link fence, a common symbol of confinement, creates a psychological barrier that can trigger feelings of entrapment, as the viewer is physically separated from the primate. The primate's crouched, withdrawn posture, combined with its lowered head, suggests vulnerability and helplessness, which can evoke fear by implying a lack of control or threat. The stark, monochromatic lighting and the lack of color and the confined space contribute to an atmosphere of tension and potential danger."
+        },
+        {
+          "emotion": "Sadness",
+          "perception": "The image shows a black-and-white scene of a person sitting on the ground against a brick wall, viewed through a chain-link fence. The person is hunched over with their head bowed, hands clasped near their chest, and legs drawn up, positioned in a corner of a grassy area with scattered rocks. The background consists of a brick wall and a grassy patch, with the chain-link fence creating a barrier between the viewer and the subject. The lighting is even and muted, with no strong shadows or highlights, contributing to a somber atmosphere.",
+          "trigger": "The person’s hunched posture and bowed head, combined with their clasped hands near their chest, suggest a state of withdrawal or distress, which can trigger feelings of sadness in observers. The chain-link fence acts as a physical barrier, symbolizing isolation or confinement, which often evokes empathy for the subject’s potential loneliness. The muted, even lighting and the stark, monochromatic palette of the image create a somber mood, reinforcing the emotional weight of the scene and implying a sense of melancholy."
+        }
+      ]
+    },
+    {
+      "id": "team",
+      "label": "Team shirts",
+      "media": "explore-team",
+      "alt": "Three men in orange “TEAM” t-shirts outdoors",
+      "groundTruth": "Excitement",
+      "justifications": [
+        {
+          "emotion": "Amusement",
+          "perception": "The image shows three men in bright orange t-shirts with \"TEAM\" printed on them, standing outdoors in front of a building with the number \"8252\" above a doorway. The man on the left has spiky blonde hair and is making a peace sign with his right hand while sticking his tongue out, wearing black fingerless gloves and sunglasses. The man in the center has dark hair and is smiling broadly with his mouth open, also wearing sunglasses and black fingerless gloves, with his left arm around the man on the left. The man on the right has short black hair, wears sunglasses, and holds a red object in his right hand, looking directly at the camera. The background includes other people, a wooden chair, and a red sign with \"VOLUNTEER\" visible, suggesting a public event or gathering.",
+          "trigger": "The bright orange t-shirts and the men's playful poses, such as the peace sign and sticking out tongues, create a sense of lightheartedness and informality that naturally draws attention and invites laughter. The man in the center's broad smile and open mouth, combined with the casual, energetic body language of the group, suggests a carefree and fun atmosphere that makes viewers feel relaxed and entertained. The contrast between the vibrant orange clothing and the neutral background further emphasizes the subjects' lively presence, enhancing the feeling of amusement through visual contrast and dynamic energy."
+        },
+        {
+          "emotion": "Anger",
+          "perception": "The image shows three men in bright orange shirts with \"TEAM\" printed on them, standing close together in an outdoor urban setting with a building marked \"8252\" in the background. The man on the left has spiky blonde hair and is making a peace sign with his right hand while sticking out his tongue, wearing black gloves and sunglasses. The man in the center has dark hair and is smiling with his mouth open, wearing sunglasses and black gloves, while the man on the right has short black hair, wears sunglasses, and holds a red object in his right hand. The scene includes other people in the background, some seated and others standing, with casual clothing and a relaxed atmosphere. The lighting is bright, suggesting daytime, and the composition focuses on the three men in the foreground.",
+          "trigger": "The bright orange shirts and the men's close physical proximity create a sense of confrontation or dominance, which can trigger feelings of being overwhelmed or challenged. The man on the left sticking out his tongue and making a peace sign, combined with the man in the center's broad smile, suggests a display of confidence or provocation, which may make others feel threatened or irritated. The man on the right holding a red object while standing close to the others adds to the sense of a group dynamic that could be perceived as aggressive or assertive, leading to a feeling of being targeted or challenged."
+        },
+        {
+          "emotion": "Awe",
+          "perception": "The image shows three men in bright orange t-shirts with \"TEAM\" printed on them, standing closely together in an outdoor urban setting with a building marked \"8252\" in the background. The man on the left has spiky blonde hair and is making a peace sign with his gloved hand, while the man in the center has dark hair and is smiling broadly with his mouth open, and the man on the right has short black hair and is wearing sunglasses, looking directly at the camera. The scene is brightly lit with natural daylight, and other people are visible in the background, some seated and others standing, creating a lively, public atmosphere. The men's casual, postures and the vibrant orange color of their shirts contrast with the neutral gray building behind them, drawing attention to their presence.",
+          "trigger": "The bright orange t-shirts worn by the three men create a strong visual contrast against the neutral gray building, which draws the viewer's attention and makes their presence more prominent. This visual prominence, combined with their energetic postures and direct engagement with the camera, creates a sense of dynamic presence that can evoke awe by making the subjects feel larger than life. The natural daylight and the lively, public setting further enhance this effect by adding a sense of immediacy and scale, making the scene feel expansive and impactful."
+        },
+        {
+          "emotion": "Contentment",
+          "perception": "The image shows three men in bright orange t-shirts with \"TEAM\" printed on them, standing outdoors in front of a building with the number \"8252\" above a doorway. The man on the left has spiky blonde hair and is making a peace sign with his right hand while sticking out his tongue, wearing black gloves and sunglasses. The man in the center has dark hair and is smiling broadly with his mouth open, also wearing sunglasses and black gloves, while the man on the right has short black hair, wears sunglasses, and holds a red object in his right hand. The energetic background includes other people, some seated on chairs, and a casual outdoor setting with a building facade and a sign that reads \"VOLUNTEER\" visible behind the leftmost man. The lighting is bright and even, suggesting daytime, and the overall composition is casual and relaxed.",
+          "trigger": "The bright orange t-shirts and casual outdoor setting create a sense of ease and informality, which can make viewers feel relaxed and at ease. The men's relaxed postures and smiles, particularly the central figure's broad grin, suggest a comfortable and happy state, which can evoke a feeling of contentment. The presence of other people in the background, engaged in casual activities, adds to the sense of a pleasant, communal atmosphere, reinforcing the idea of contentment through the implication of shared enjoyment."
+        },
+        {
+          "emotion": "Disgust",
+          "perception": "The image shows three men in bright orange t-shirts with \"TEAM\" printed on them, standing outdoors in front of a building with the number \"8252\" above a doorway. The man on the left has spiky blonde hair and is making a peace sign with his right hand while sticking his tongue out; the man in the center has dark hair and is smiling broadly with his mouth open; the man on the right has short black hair, wears sunglasses, and holds a red object in his right hand. All three wear black gloves and have black straps across their chests, and the background includes other people, a chair, and a red sign with \"VOLUNTEER\" visible. The lighting is bright and even, suggesting daytime, and the scene appears to be a public gathering or event.",
+          "trigger": "The bright orange t-shirts and black gloves worn by the three men create a visually striking contrast that draws attention to their attire, which may trigger a sense of unease due to the unusual combination of colors and accessories. The man on the left sticking his tongue out and making a peace sign, along with the man in the center's open-mouthed smile, suggests a display of exaggerated or inappropriate behavior that can evoke discomfort in observers. The presence of the red object held by the man on the right, combined with the overall casual and somewhat chaotic appearance of the group, may contribute to a feeling of revulsion or distaste, as such displays often signal a lack of social norms or propriety."
+        },
+        {
+          "emotion": "Excitement",
+          "perception": "The image shows three men in bright orange t-shirts with \"TEAM\" printed on them, standing closely together in an outdoor urban setting with a building marked \"8252\" in the background. The man on the left has spiky blonde hair and is making a peace sign with his right hand while sticking out his tongue, wearing black fingerless gloves and sunglasses. The man in the center has dark hair and is smiling widely with his mouth open, also wearing sunglasses and black fingerless gloves, while the man on the right has short black hair, wears sunglasses, and holds a red object in his right hand. All three have black straps across their chests, and the background includes other people, a chair, and a red sign with \"VISA\" visible, suggesting a public event or gathering.",
+          "trigger": "The bright orange t-shirts and the men's energetic postures, such as the peace sign and open-mouthed smiles, create a sense of vibrancy and liveliness that naturally draws attention and stimulates positive feelings. The close physical proximity of the three men, combined with their animated facial expressions and casual, playful gestures, suggests a shared moment of joy and enthusiasm, which can make viewers feel uplifted and engaged. The urban setting with other people in the background implies a social, public event, which often amplifies feelings of excitement through the collective energy of the crowd."
+        },
+        {
+          "emotion": "Fear",
+          "perception": "The image shows three men in bright orange shirts with \"TEAM\" printed on them, standing in front of a building with the number \"8252\" above a doorway. The man on the left has blonde hair and is making a peace sign with his right hand while sticking out his tongue. The man in the center has dark hair and is also wearing sunglasses, smiling broadly with his mouth open, and has his left arm around the man on the left. The man on the right has short black hair, wears sunglasses, and is holding a red object in his right hand, looking directly at the camera with his mouth slightly open. The background includes other people, some seated on chairs, and a casual outdoor setting with a building facade and a sign that reads \"VOLUNTEER\" on a black shirt worn by a person in the background.",
+          "trigger": "The bright orange shirts worn by the three men create a sense of visual intensity, which can trigger a response of unease or discomfort. The man on the left sticking out his tongue and making a peace sign, combined with the man in the center's broad smile and open mouth, suggests a display of exaggerated or aggressive behavior, which can evoke feelings of apprehension. The man on the right's direct gaze and open mouth, along with his posture, may appear confrontational, leading to a sense of being watched or threatened. These visual elements together create an atmosphere of tension and potential threat, which can elicit a fear response."
+        },
+        {
+          "emotion": "Sadness",
+          "perception": "The image shows three men in bright orange t-shirts with \"TEAM\" printed on them, standing outdoors in front of a building with the number \"8252\" above a doorway. The man on the left has spiky blonde hair and is making a peace sign with his right hand while sticking out his tongue; the man in the middle has dark hair and is smiling broadly with his mouth open; the man on the right has short black hair, wears sunglasses, and holds a red object in his right hand. In the background, other people are visible, including a woman sitting on a chair and another person standing near a table with a sign that reads \"VOLUNTEER.\" The lighting appears to be natural daylight, and the overall scene has a casual, public setting with a mix of urban and outdoor elements.",
+          "trigger": "The bright orange t-shirts and casual outdoor setting might initially suggest a positive or energetic atmosphere, but the presence of the man on the left sticking out his tongue and the man in the middle with an open mouth could imply a lack of genuine connection or warmth. The man on the right, wearing sunglasses and holding a red object, appears detached from the interaction, which might create a sense of isolation. These visual cues, combined with the casual public setting, could l o w i n g p h r a s e s \" T h i s w o r k a d d r e s s e s t h e evoke a feeling of sadness by highlighting a lack of meaningful engagement or i n d t h i s s u b m i s s i o n \" shared experience among the individuals in the scene."
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "problem",
+      "title": "Why emotion is hard for machines",
+      "blocks": [
+        {
+          "type": "p",
+          "html": "Look at a photo of an abandoned room with light pouring through the door. Is it <em>eerie</em>? <em>Hopeful</em>? <em>Sad</em>? People disagree, and they can all explain why. Emotion in images is <b>subjective</b>: the same scene supports several readings, depending on what you notice."
+        },
+        {
+          "type": "p",
+          "html": "Most emotion-recognition models ignore this. They pick <b>one label from a fixed list</b> and give no reason. Newer multimodal chatbots can explain themselves, but their explanations are often loosely tied to what is actually in the picture, and they still assume a single right answer."
+        },
+        {
+          "type": "media",
+          "id": "problem"
+        }
+      ],
+      "deeper": {
+        "summary": "Go deeper: where existing approaches fall short",
+        "blocks": [
+          {
+            "type": "p",
+            "html": "Visual Sentiment Analysis (VSA) has classically been image classification over a closed set of categories. Language-supervised methods and emotion-tuned multimodal LLMs (e.g. EmoVIT, Emotion-LLaMA) moved the field from predicting <em>what</em> emotion is present toward explaining <em>why</em>, but they tend to (1) treat interpretation as a single fixed prediction, (2) produce weakly grounded explanations, (3) stay tied to one taxonomy, or (4) focus on faces and people rather than general scenes."
+          }
+        ]
+      }
+    },
+    {
+      "id": "method",
+      "title": "How it works: Perception → Trigger → Label",
+      "blocks": [
+        {
+          "type": "p",
+          "html": "PeqEMO answers in three steps, the way a careful person would explain a feeling:"
+        },
+        {
+          "type": "cards",
+          "items": [
+            {
+              "step": "1",
+              "title": "Perception",
+              "text": "Describe only what is visible: setting, lighting, colours, the main subject."
+            },
+            {
+              "step": "2",
+              "title": "Trigger",
+              "text": "Explain how those visual cues could make someone feel something, as simple cause-and-effect chains."
+            },
+            {
+              "step": "3",
+              "title": "Label",
+              "text": "Name the emotion that follows from the evidence."
+            }
+          ]
+        },
+        {
+          "type": "media",
+          "id": "howitworks"
+        },
+        {
+          "type": "p",
+          "html": "Because the list of allowed emotions is written into the prompt, the same model works with <b>any emotion vocabulary</b>, from 2 categories up to more than 25, without retraining. And because the label can be supplied instead of predicted, you can ask it: <em>“explain why this image could feel like fear”</em>."
+        },
+        {
+          "type": "media",
+          "id": "framework"
+        }
+      ],
+      "deeper": {
+        "summary": "Go deeper: model, training and inference",
+        "blocks": [
+          {
+            "type": "list",
+            "items": [
+              "<b>Backbone:</b> Qwen3-VL at 2B, 4B and 8B parameters, fine-tuned with LoRA (rank 32, α = 64, dropout 0.05) on all attention and MLP projections of both the vision encoder and the language decoder.",
+              "<b>Cheap to train:</b> AdamW, learning rate 5×10<sup>−5</sup>, cosine schedule, 2 epochs, with Unsloth dynamic 4-bit quantization. Every model size trains in about <b>30 minutes on a single RTX 3090</b> (24 GB).",
+              "<b>Taxonomy-agnostic prompting:</b> the prompt ends with <code>Choose the final label from the allowed taxonomy: {taxonomy}</code>, so the label space is swapped at inference time.",
+              "<b>Two-stage inference:</b> first the label is predicted deterministically (temperature 0, ≤15 tokens); then the response is prefilled with that label and the justification is sampled (temperature 0.75, top-p 0.8, ≤224 tokens).",
+              "<b>Conditioned justification:</b> prefill <code>Predicted Label: y</code> with any emotion <i>y</i> and the model writes a justification for that reading, while keeping the image and taxonomy fixed."
+            ]
+          },
+          {
+            "type": "code",
+            "label": "Instruction prompt",
+            "text": "You are an expert annotator for visual emotion recognition.\nAnalyze the image and produce a structured reasoning chain following this exact format:\n\nPredicted Label:\n[EMOTION_LABEL]\nJustification:\n[Detailed visual description]\n[Psychological causal chains]\n\nChoose the final label from the allowed taxonomy: {taxonomy}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "explore",
+      "title": "One image, eight emotions",
+      "blocks": [
+        {
+          "type": "p",
+          "html": "This is the part we find most interesting. Pick an image, then pick an emotion: PeqEMO writes a justification <b>for that emotion</b>, pointing only at things that are really in the picture. The <span class=\"gt-pill\">dataset label</span> marks the emotion the dataset's annotators chose."
+        },
+        {
+          "type": "explorer"
+        }
+      ],
+      "deeper": {
+        "summary": "Go deeper: what the model is doing here",
+        "blocks": [
+          {
+            "type": "p",
+            "html": "These are <b>conditioned justifications</b> (paper §5.5, Appendix F). The image and the 8-class EmoSet taxonomy stay fixed; only the prefilled label changes. The <i>Perception</i> paragraph stays faithful to the image, while the <i>Trigger</i> paragraph selects different visual cues to build each reading. The dense pansies read as playful under <i>amusement</i>, but as overwhelming clutter under <i>fear</i>. Some texts end in “…” where the paper's figure truncates them."
+          }
+        ]
+      }
+    },
+    {
+      "id": "dataset",
+      "title": "VIA-EmoSET: teaching the model to explain",
+      "blocks": [
+        {
+          "type": "p",
+          "html": "To learn this kind of answer, PeqEMO needs examples of it. We built <b>VIA-EmoSET</b>: <b>94,481</b> images from EmoSet, each paired with a Perception / Trigger / Label explanation written by an <b>open</b> vision-language model (GLM-4.6V). There is no proprietary annotation pipeline, so anyone can reproduce it."
+        },
+        {
+          "type": "media",
+          "id": "dataset"
+        }
+      ],
+      "deeper": {
+        "summary": "Go deeper: why EmoSet, and the annotation rules",
+        "blocks": [
+          {
+            "type": "list",
+            "items": [
+              "<b>EmoSet</b> has 118,102 <i>human-verified</i> images over 8 balanced emotions (amusement, anger, awe, contentment, disgust, excitement, fear, sadness): the largest human-annotated visual emotion dataset, about 5× larger than FI. Larger web datasets such as WEBEmo (~268k) derive labels from noisy metadata.",
+              "<b>Perception</b>: 2–4 sentences describing only observable details (background, lighting, colours, subject). No emotions, intentions or story.",
+              "<b>Trigger</b>: 3–5 sentences of causal chains, <i>visual element → psychological mechanism → emotional implication</i>, written in plain language and referencing only the Perception.",
+              "<b>Label</b>: the EmoSet ground truth. The annotator is told the correct label and must genuinely support it from the image. Responses are capped at 512 tokens."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "emoloss",
+      "title": "Emo-Loss: don't let the answer get drowned out",
+      "blocks": [
+        {
+          "type": "p",
+          "html": "A justification is a few hundred words long; the emotion label is one to three. With ordinary training, every word counts the same, so the label contributes only about <b>1–2%</b> of the learning signal. The model gets very good at writing fluent explanations and less careful about the actual answer. We call this <b>label dilution</b>."
+        },
+        {
+          "type": "p",
+          "html": "The fix is simple: during training, the label tokens count <b>30× more</b>. That roughly balances “get the emotion right” against “explain it well”."
+        },
+        {
+          "type": "media",
+          "id": "emoloss"
+        }
+      ],
+      "deeper": {
+        "summary": "Go deeper: the objective",
+        "blocks": [
+          {
+            "type": "html",
+            "html": "<div class=\"math\"><math display=\"block\"><mrow><msub><mi>w</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>{</mo><mtable><mtr><mtd><mi>λ</mi><mo>,</mo></mtd><mtd><mi>t</mi><mo>∈</mo><mover><mi>y</mi><mo>^</mo></mover></mtd></mtr><mtr><mtd><mn>1</mn><mo>,</mo></mtd><mtd><mtext>otherwise</mtext></mtd></mtr></mtable></mrow><mspace width=\"2em\"></mspace><msub><mi mathvariant=\"script\">L</mi><mtext>Emo</mtext></msub><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mo>−</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>w</mi><mi>t</mi></msub><mo>log</mo><msub><mi>P</mi><mi>θ</mi></msub><mo>(</mo><msub><mi>y</mi><mi>t</mi></msub><mo>|</mo><msub><mi>y</mi><mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><mo>,</mo><mi>I</mi><mo>)</mo></mrow></math></div>"
+          },
+          {
+            "type": "p",
+            "html": "Visual emotion perception is framed as conditional sequence generation: given image <i>I</i> and a prompt with taxonomy <i>T</i>, the model outputs a sequence containing a label <i>ŷ</i> ∈ <i>T</i> and a justification <i>J</i>. Emo-Loss is token-weighted cross-entropy: tokens belonging to the label get weight <i>λ</i> = 30, all others weight 1. The value is a balancing heuristic, chosen to roughly equalize the cumulative contribution of the 1–3 label tokens with the full justification. It reduces fluent but label-inconsistent outputs."
+          }
+        ]
+      }
+    },
+    {
+      "id": "results",
+      "title": "Results",
+      "blocks": [
+        {
+          "type": "p",
+          "html": "Small, cheap models, but strong ones. Even the 2B version beats the emotion-specialized EmoVIT-8B on average, the 4B and 8B versions beat <b>GPT-5.2</b> on a mixed benchmark, and independent AI judges prefer PeqEMO's explanations."
+        },
+        {
+          "type": "stats",
+          "items": [
+            {
+              "value": "77.25%",
+              "label": "accuracy on EmoSet",
+              "note": "PeqEMO-8B, vs 73.09% for EmoVIT-8B"
+            },
+            {
+              "value": "57.67%",
+              "label": "on a 4,056-image mixed benchmark",
+              "note": "PeqEMO-4B, vs 54.96% for GPT-5.2"
+            },
+            {
+              "value": "97.3%",
+              "label": "judge win rate",
+              "note": "vs EmoVIT-8B, judged by GLM-4.6V"
+            },
+            {
+              "value": "~30 min",
+              "label": "to train",
+              "note": "any size, on one RTX 3090"
+            }
+          ]
+        },
+        {
+          "type": "bars",
+          "title": "Accuracy on a class-balanced benchmark drawn from 8 datasets (6, 8 and 25 emotion classes)",
+          "unit": "%",
+          "items": [
+            {
+              "label": "PeqEMO-4B",
+              "value": 57.67,
+              "highlight": true
+            },
+            {
+              "label": "PeqEMO-8B",
+              "value": 57.15,
+              "highlight": true
+            },
+            {
+              "label": "GPT-5.2",
+              "value": 54.96
+            },
+            {
+              "label": "PeqEMO-2B",
+              "value": 49.16,
+              "highlight": true
+            },
+            {
+              "label": "Qwen3-VL-8B (base)",
+              "value": 49.01
+            },
+            {
+              "label": "EmoVIT-8B",
+              "value": 41.3
+            }
+          ]
+        }
+      ],
+      "deeper": {
+        "summary": "Go deeper: full tables and caveats",
+        "blocks": [
+          {
+            "type": "table",
+            "caption": "Top-1 accuracy (%) in-domain (EmoSet) and zero-shot on seven other datasets; number of classes in parentheses. Best per row in bold.",
+            "head": [
+              "Dataset",
+              "Qwen3-VL-2B",
+              "PeqEMO-2B",
+              "Qwen3-VL-4B",
+              "PeqEMO-4B",
+              "Qwen3-VL-8B",
+              "PeqEMO-8B",
+              "EmoVIT-8B"
+            ],
+            "rows": [
+              [
+                "EmoSet (8)",
+                "45.24",
+                "72.48",
+                "53.48",
+                "77.19",
+                "55.97",
+                "<b>77.25</b>",
+                "73.09"
+              ],
+              [
+                "WEBEmo (25)",
+                "21.02",
+                "18.69",
+                "23.57",
+                "<b>25.74</b>",
+                "21.75",
+                "25.62",
+                "6.03"
+              ],
+              [
+                "FI (8)",
+                "49.20",
+                "62.40",
+                "57.66",
+                "68.03",
+                "53.38",
+                "<b>69.02</b>",
+                "54.53"
+              ],
+              [
+                "Emotion6 (6)",
+                "56.66",
+                "53.25",
+                "59.82",
+                "<b>62.81</b>",
+                "55.54",
+                "60.90",
+                "45.31"
+              ],
+              [
+                "Abstract (8)",
+                "<b>29.29</b>",
+                "22.50",
+                "20.71",
+                "27.86",
+                "20.71",
+                "28.57",
+                "15.71"
+              ],
+              [
+                "ArtPhoto (8)",
+                "38.46",
+                "40.69",
+                "42.56",
+                "<b>43.92</b>",
+                "41.32",
+                "42.31",
+                "36.72"
+              ],
+              [
+                "EmotionROI (6)",
+                "48.65",
+                "40.07",
+                "48.65",
+                "53.03",
+                "53.03",
+                "<b>59.76</b>",
+                "41.10"
+              ],
+              [
+                "UnBiasedEmo (6)",
+                "84.01",
+                "78.16",
+                "84.43",
+                "85.91",
+                "<b>86.01</b>",
+                "83.84",
+                "45.81"
+              ],
+              [
+                "<b>Average</b>",
+                "46.57",
+                "48.53",
+                "48.86",
+                "55.56",
+                "48.59",
+                "<b>55.91</b>",
+                "39.79"
+              ]
+            ]
+          },
+          {
+            "type": "p",
+            "html": "<b>In-domain</b>, instruction tuning adds +21 to +27 points at every scale. <b>Zero-shot</b>, PeqEMO transfers across vocabularies (e.g. FI: 53.38 → 69.02) while EmoVIT collapses on taxonomies unlike its training data (6.03% on the 25-class WEBEmo). Even PeqEMO-2B beats EmoVIT-8B on average (48.53 vs 39.79)."
+          },
+          {
+            "type": "table",
+            "caption": "Justification quality: PeqEMO's win rate against EmoVIT-8B, and PeqEMO's average score per criterion (1–5), under three independent judges.",
+            "head": [
+              "Judge",
+              "Win rate vs EmoVIT",
+              "Visual grounding",
+              "Emotional coherence",
+              "Causal coherence",
+              "Helpfulness"
+            ],
+            "rows": [
+              [
+                "Gemma-3-27B",
+                "82.7%",
+                "3.47",
+                "3.45",
+                "3.37",
+                "3.31"
+              ],
+              [
+                "GLM-4.6V",
+                "<b>97.3%</b>",
+                "<b>4.24</b>",
+                "3.06",
+                "<b>3.77</b>",
+                "3.37"
+              ],
+              [
+                "Qwen-3-VL-32B",
+                "84.6%",
+                "3.66",
+                "<b>3.47</b>",
+                "3.48",
+                "<b>3.60</b>"
+              ]
+            ]
+          },
+          {
+            "type": "p",
+            "html": "<b>Caveat:</b> LLM judges have known verbosity, position and self-preference biases. We use three judges from different model families and randomize A/B order, but judge–expert agreement in specialized domains is around 60–68%, so treat these scores as a complementary signal to the accuracy benchmarks."
+          }
+        ]
+      }
+    },
+    {
+      "id": "examples",
+      "title": "What it gets right, and where it disagrees",
+      "blocks": [
+        {
+          "type": "p",
+          "html": "When PeqEMO is right, its explanation points at the exact cues a person would. When it “fails”, the explanation often shows a <b>different but reasonable reading</b>, which says as much about single-label benchmarks as about the model."
+        },
+        {
+          "type": "cases",
+          "title": "Correct predictions",
+          "items": [
+            {
+              "media": "success-couple",
+              "gt": "Contentment",
+              "pred": "Contentment",
+              "text": "The bright sunlight and clear skies create a sense of warmth and openness, which can evoke feelings of comfort and relaxation. The casual attire of the subjects, light clothing suitable for warm weather, and their relaxed posture while walking hand-in-hand suggest ease and familiarity, fostering a connection between them that implies satisfaction. The presence of tropical vegetation and resort-style architecture reinforces an association with vacations or pleasant getaways, contributing to an implication of peaceful enjoyment."
+            },
+            {
+              "media": "success-dogs",
+              "gt": "Anger",
+              "pred": "Anger",
+              "text": "The open mouths of both dogs displaying visible teeth create an immediate sense of threat, as bared canines are a common signal of aggression in animals. This visual cue triggers an instinctive psychological mechanism that prepares viewers for potential danger or conflict, leading to heightened alertness. The close physical proximity between the two dogs further emphasizes their confrontational stance, reinforcing the implication of tension and hostility in the interaction."
+            }
+          ]
+        },
+        {
+          "type": "cases",
+          "title": "Disagreements with the dataset label",
+          "items": [
+            {
+              "media": "failure-dinosaur",
+              "gt": "Anger",
+              "pred": "Fear",
+              "note": "Perspective: the dinosaur <i>expresses</i> anger, but the viewer <i>feels</i> fear.",
+              "text": "The dinosaur's wide-open mouth with sharp teeth, a common visual cue for danger, triggers an instinctive sense of threat. The combination of the dinosaur's imposing size and the artificial, enclosed setting creates a sense of being trapped, which can evoke feelings of unease. The contrast between the bright teeth and the surroundings enhances the visual impact of the threat, making the scene feel potentially frightening."
+            },
+            {
+              "media": "failure-grid",
+              "gt": "Fear",
+              "pred": "Amusement",
+              "note": "Co-occurring emotions: suspenseful play is both fun and scary.",
+              "text": "The cool blue lighting and grid structures create a playful, futuristic atmosphere that can evoke a sense of lightheartedness. The figures' raised hands and dynamic postures suggest movement and energy, which often leads to feelings of amusement. The high contrast between the illuminated grids and the dark background adds visual interest, making the scene feel engaging and entertaining."
+            },
+            {
+              "media": "failure-clown",
+              "gt": "Amusement",
+              "pred": "Fear",
+              "note": "Cultural priors: labelled amusement because it's a theme park, but clowns are widely associated with unease.",
+              "text": "The clown's exaggerated facial features, such as the large red nose and wide mouth, trigger a psychological mechanism of threat detection, as these distorted proportions can evoke a sense of unease. The bright, chaotic lighting and the carnival setting, which often includes unpredictable elements, create an atmosphere of uncertainty, leading to a feeling of discomfort."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "limitations",
+      "title": "Limitations and responsible use",
+      "blocks": [
+        {
+          "type": "list",
+          "items": [
+            "<b>Emotion is subjective.</b> Outputs are plausible interpretations, not psychological ground truth. Datasets also blur the <i>expressed</i> emotion of a subject with the <i>evoked</i> emotion of the viewer.",
+            "<b>Inherited biases.</b> PeqEMO picks up priors from its training data, such as landscapes → awe or clowns → fear, which may not match every culture or person.",
+            "<b>Intended use:</b> affective-computing research and creative work (advertising, design, film). <b>Not</b> for surveillance, mass emotion monitoring, or high-stakes decisions such as hiring, law enforcement or mental-health triage. Any use involving real people needs consent and human review."
+          ]
+        }
+      ]
+    }
+  ],
+  "bibtex": "@inproceedings{peqemo2026,\n  title     = {Semantic Justifications for Multiple Interpretations of Visual Emotion Perception with Open Vocabulary},\n  author    = {Anonymous},\n  booktitle = {Under review},\n  year      = {2026}\n}"
+}

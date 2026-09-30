@@ -4,4 +4,10 @@
         <loc>{{ site_url }}</loc>
         <lastmod>{{ today }}</lastmod>
     </url>
+    {% for slug in projects %}
+    <url>
+        <loc>{{ site_url }}{{ slug }}/</loc>
+        <lastmod>{{ today }}</lastmod>
+    </url>
+    {% endfor %}
 </urlset>

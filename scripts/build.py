@@ -41,7 +41,7 @@ MY_AUTHOR_NAMES = [
 NEWS_STALE_MONTHS = 18
 
 # Files/folders copied verbatim into _site/
-STATIC = ["style.css", "site.js", "assets"]
+STATIC = ["style.css", "site.js", "project.css", "project.js", "assets"]
 
 warnings = []
 
@@ -303,6 +303,90 @@ def make_og_image(info, avatar, out_path):
     return True
 
 
+# -------- Project pages (projects/<slug>/ -> _site/<slug>/) --------
+
+
+def make_project_og_image(project, out_path):
+    """1200x630 preview card in the clean academic style of project pages."""
+    if not Image:
+        return False
+    W, H = 1200, 630
+    img = Image.new("RGB", (W, H), (255, 255, 255))
+    d = ImageDraw.Draw(img)
+    sans = lambda s, w=400: ImageFont.truetype(str(FONTS / f"NotoSans-{w}.ttf"), s)
+    d.rectangle([0, 0, W, 14], fill=(54, 54, 54))
+
+    def wrap(text, font, max_w):
+        lines, line = [], ""
+        for word in text.split():
+            test = (line + " " + word).strip()
+            if d.textlength(test, font=font) <= max_w or not line:
+                line = test
+            else:
+                lines.append(line)
+                line = word
+        return lines + ([line] if line else [])
+
+    y = 90
+    d.text((80, y), project.get("short", ""), font=sans(96, 700), fill=(54, 54, 54))
+    y += 140
+    f = sans(38, 700)
+    for line in wrap(project.get("title", ""), f, W - 160)[:3]:
+        d.text((80, y), line, font=f, fill=(74, 74, 74))
+        y += 54
+    y += 20
+    f = sans(28)
+    for line in wrap(project.get("venue", ""), f, W - 160)[:1]:
+        d.text((80, y), line, font=f, fill=(122, 122, 122))
+    d.text((80, H - 80), f"{urlparse(SITE_URL).netloc}/{project['slug']}", font=sans(26, 700), fill=(50, 115, 220))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out_path, optimize=True)
+    return True
+
+
+def build_projects(env, today):
+    """Render every projects/<slug>/project.json as a standalone page at /<slug>/.
+    Media slots whose file is missing from projects/<slug>/media/ render as placeholders."""
+    slugs = []
+    for pj in sorted((ROOT / "projects").glob("*/project.json")):
+        src = pj.parent
+        project = json.loads(pj.read_text(encoding="utf-8"))
+        slug = project.setdefault("slug", src.name)
+        out = OUT / slug
+
+        media_dir = src / "media"
+        missing = []
+        for mid, slot in project.get("media", {}).items():
+            path = media_dir / slot["file"]
+            slot["exists"] = path.exists()
+            slot["src"] = f"media/{slot['file']}"
+            webp = path.with_suffix(".webp")
+            slot["webp"] = f"media/{webp.name}" if slot["kind"] == "image" and webp.exists() else ""
+            if not slot["exists"]:
+                missing.append(slot["file"])
+        if missing:
+            warnings.append(f"{slug}: {len(missing)} media placeholders still empty: {', '.join(missing)}")
+
+        out.mkdir(parents=True, exist_ok=True)
+        if media_dir.exists():
+            shutil.copytree(media_dir, out / "media", dirs_exist_ok=True, ignore=shutil.ignore_patterns(".gitkeep"))
+        og = make_project_og_image(project, out / "og.png")
+
+        html = env.get_template("project.html.j2").render(
+            p=project,
+            site_url=SITE_URL,
+            page_url=f"{SITE_URL}{slug}/",
+            og_image=f"{SITE_URL}{slug}/og.png" if og else "",
+            css_v=asset_version("project.css"),
+            js_v=asset_version("project.js"),
+            today=today.isoformat(),
+            year=today.year,
+        )
+        (out / "index.html").write_text(html, encoding="utf-8")
+        slugs.append(slug)
+    return slugs
+
+
 # -------- Structured data --------
 
 
@@ -431,6 +515,8 @@ def main():
         lstrip_blocks=True,
     )
 
+    ctx["projects"] = build_projects(env, today)
+
     for name, out_name in [
         ("index.html.j2", "index.html"),
         ("404.html.j2", "404.html"),
@@ -450,7 +536,10 @@ def main():
 
     for w in warnings:
         print("WARNING:", w)
-    print(f"Built {OUT.relative_to(ROOT)}/ ({len(pubs)} publications, {len(news)} news items)")
+    print(
+        f"Built {OUT.relative_to(ROOT)}/ ({len(pubs)} publications, {len(news)} news items, "
+        f"project pages: {', '.join('/' + s for s in ctx['projects']) or 'none'})"
+    )
 
 
 if __name__ == "__main__":

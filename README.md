@@ -29,6 +29,19 @@ The build warns about news older than 18 months, and generates the 1200×630 lin
 ]
 ```
 
+## Project pages (`yusepp.github.io/<slug>`)
+
+Every folder `projects/<slug>/` with a `project.json` becomes a standalone paper page at `/<slug>/` (e.g. [`/peqemo`](https://yusepp.github.io/peqemo/)), rendered by `templates/project.html.j2` with `project.css` / `project.js`.
+
+- **Text:** everything lives in `project.json`: `title`, `authors`, `venue`, `links` (an empty `url` shows the button as "soon"), `tldr`, `sections` (each with plain-language `blocks` plus an optional "Go deeper" `deeper` part), the `explorer` data and the `bibtex`.
+- **Media:** each figure, GIF or video is a slot in `project.json` → `media` (`file`, `kind`, `aspect`, `caption`, `todo`). If `projects/<slug>/media/<file>` exists it's shown; otherwise the page shows a placeholder with the file name and what should go there. The build lists every empty slot:
+  ```
+  WARNING: peqemo: 15 media placeholders still empty: teaser.mp4, problem.png, ...
+  ```
+  To fill one, drop the file into `projects/<slug>/media/` with that exact name and rebuild. For images you can also add a `.webp` with the same name. Keep videos short and small (MP4/H.264, muted loop).
+- **Block types** for `sections[].blocks`: `p`, `list`, `media`, `cards`, `stats`, `bars`, `table`, `code`, `cases`, `html`, `explorer`.
+- **New project:** copy `projects/peqemo/` to `projects/<new-slug>/`, edit `project.json`, rebuild.
+
 ## Visitor stats (optional)
 
 Sign up at [goatcounter.com](https://www.goatcounter.com) (free, no cookies). Then put your site code (the `CODE` in `CODE.goatcounter.com`) in `info/misc.json` → `"goatcounterCode"`. Leave it empty to turn stats off.

@@ -42,6 +42,23 @@ Every folder `projects/<slug>/` with a `project.json` becomes a standalone paper
 - **Block types** for `sections[].blocks`: `p`, `list`, `media`, `cards`, `stats`, `bars`, `table`, `code`, `cases`, `html`, `explorer`.
 - **New project:** copy `projects/peqemo/` to `projects/<new-slug>/`, edit `project.json`, rebuild.
 
+### Re-rendering the PeqEMO media
+
+The photos and animations in `projects/peqemo/media/` are generated from the paper, so they can be re-made after edits:
+
+```bash
+# photos embedded in the paper (explorer images, Fig. 4/5 cases), as .jpg + .webp
+python scripts/media/extract_photos.py path/to/paper.pdf
+
+# animations + diagrams: HTML scenes in scripts/media/scenes/ -> MP4 (1080p30, H.264) / PNG + WebP
+cd scripts/media
+npm install && npx playwright install chromium    # once
+node render.mjs                                    # everything (add --gif for slide-friendly GIFs in projects/peqemo/extras/)
+node render.mjs teaser --preview 3,9,15            # dump a few frames to scripts/media/preview/ to check a scene
+```
+
+Each scene reads the real justifications from `project.json`, so text shown in videos is always the model's verbatim output. Cue boxes on photos are placed by hand in each scene file (fractions of the photo size).
+
 ## Visitor stats (optional)
 
 Sign up at [goatcounter.com](https://www.goatcounter.com) (free, no cookies). Then put your site code (the `CODE` in `CODE.goatcounter.com`) in `info/misc.json` → `"goatcounterCode"`. Leave it empty to turn stats off.

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="common.css" />
+<style>
+    .stage { width: 1920px; height: 840px; }
+    .col { position: absolute; top: 90px; }
+    .col h3 { margin: 0 0 6px; font-size: 30px; }
+    .col .sub { font-size: 20px; color: var(--muted); margin-bottom: 18px; line-height: 1.4; }
+
+    /* EmoSet */
+    #emoset { left: 70px; width: 470px; }
+    .thumb { position: relative; display: flex; align-items: center; gap: 16px; margin-bottom: 14px;
+             padding: 10px; border-radius: 14px; background: var(--panel); }
+    .thumb img { width: 150px; height: 100px; object-fit: cover; border-radius: 10px; display: block; }
+    .thumb .gt { font-size: 21px; color: var(--soft); }
+    .thumb .gt b { display: inline-block; margin-top: 4px; padding: 2px 12px; border-radius: 999px; background: #e3e3e3; color: var(--text); }
+    .stat { margin-top: 18px; font-size: 21px; color: var(--soft); line-height: 1.5; }
+    .stat b { color: var(--text); }
+
+    /* Annotator */
+    #glm { left: 640px; width: 560px; }
+    .annot { padding: 22px 24px; border-radius: 16px; border: 3px solid var(--ours); background: #eef3fc; }
+    .annot h4 { margin: 0 0 4px; font-size: 28px; color: var(--ours); }
+    .annot .sub2 { font-size: 20px; color: var(--soft); margin-bottom: 14px; }
+    .rules { font-size: 19.5px; color: var(--soft); line-height: 1.5; padding-left: 22px; margin: 0; }
+    .rules li { margin-bottom: 6px; }
+
+    /* Output format */
+    #out { left: 1300px; width: 550px; }
+    .part { padding: 16px 18px; border-radius: 14px; background: var(--panel); margin-bottom: 14px; border-left: 7px solid; }
+    .part.p { border-color: var(--perception); }
+    .part.t { border-color: var(--trigger); }
+    .part.l { border-color: var(--label); }
+    .part code { font-family: ui-monospace, Consolas, monospace; font-size: 19px; font-weight: 700; }
+    .part.p code { color: var(--perception); }
+    .part.t code { color: var(--trigger); }
+    .part.l code { color: var(--label); }
+    .part div { margin-top: 6px; font-size: 20px; color: var(--soft); line-height: 1.45; }
+    #total { margin-top: 18px; padding: 14px 18px; border-radius: 14px; background: var(--text); color: #fff; font-size: 23px; line-height: 1.4; }
+    #total b { font-size: 30px; }
+
+    svg { position: absolute; left: 0; top: 0; width: 1920px; height: 840px; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+    <svg id="arrows"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#9a9a9a"/></marker></defs></svg>
+
+    <div class="col" id="emoset">
+        <h3>EmoSet</h3>
+        <div class="sub">human-verified images, each with one of 8 emotion labels</div>
+        <div class="thumb"><img src="../../../projects/peqemo/media/explore-pansies.jpg" alt="" /><div class="gt">label<br /><b>amusement</b></div></div>
+        <div class="thumb"><img src="../../../projects/peqemo/media/explore-interior.jpg" alt="" style="object-position: 50% 30%" /><div class="gt">label<br /><b>fear</b></div></div>
+        <div class="thumb"><img src="../../../projects/peqemo/media/explore-monkey.jpg" alt="" /><div class="gt">label<br /><b>sadness</b></div></div>
+        <div class="stat"><b>118,102</b> images · <b>8</b> balanced emotions<br />training split: <b>94,481</b> images</div>
+    </div>
+
+    <div class="col" id="glm">
+        <h3>Annotate</h3>
+        <div class="sub">an open-weight model writes the explanation, told the correct label</div>
+        <div class="annot">
+            <h4>GLM-4.6V</h4>
+            <div class="sub2">open vision-language model: no proprietary annotation</div>
+            <ol class="rules">
+                <li>Describe <b>only</b> what is physically visible: background, lighting, colours, the subject.</li>
+                <li>Link visible elements to feelings as <b>cause → effect</b> chains, in plain sentences.</li>
+                <li>End with the ground-truth label, and <b>genuinely support it</b> from the image.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="col" id="out">
+        <h3>VIA-EmoSET sample</h3>
+        <div class="sub">one structured target per image, up to 512 tokens</div>
+        <div class="part p"><code>&lt;perception&gt;</code><div>2–4 sentences of observable detail, no emotions or story</div></div>
+        <div class="part t"><code>&lt;trigger&gt;</code><div>3–5 sentences: visual element → psychological mechanism → emotional implication</div></div>
+        <div class="part l"><code>&lt;label&gt;</code><div>the EmoSet emotion</div></div>
+        <div id="total"><b>94,481</b> annotated training images</div>
+    </div>
+</div>
+<script src="common.js"></script>
+<script>
+window.SCENE = { width: 1920, height: 840, duration: 0 };
+const $ = (id) => document.getElementById(id);
+function arrow(a, b) {
+    const r1 = $(a).getBoundingClientRect(), r2 = $(b).getBoundingClientRect();
+    const y = 430;
+    return `<path d="M${r1.right + 14},${y} L${r2.left - 16},${y}" stroke="#9a9a9a" stroke-width="5" fill="none" marker-end="url(#ah)"/>`;
+}
+window.setup = function () {
+    $("arrows").insertAdjacentHTML("beforeend", arrow("emoset", "glm") + arrow("glm", "out"));
+};
+window.seek = function () {};
+</script>
+</body>
+</html>

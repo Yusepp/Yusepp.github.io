@@ -12,21 +12,23 @@ import shutil
 import unicodedata
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlparse
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
 try:
-    from PIL import Image
-except ImportError:  # image sizes are optional (only used to avoid layout shift)
+    from PIL import Image, ImageDraw, ImageFont
+except ImportError:  # image sizes and the preview image are skipped without Pillow
     Image = None
 
 ROOT = Path(__file__).resolve().parent.parent
 INFO = ROOT / "info"
 OUT = ROOT / "_site"
+FONTS = ROOT / "scripts" / "fonts"  # TTFs used to draw the link-preview image
 SITE_URL = "https://yusepp.github.io/"
 
-# Variants of *your* author name to highlight
+# Spellings of your name that appear in author lists; all are shown as info.name
 MY_AUTHOR_NAMES = [
     "Josep Lopez Camuñas",
     "Josep López Camuñas",
@@ -34,8 +36,13 @@ MY_AUTHOR_NAMES = [
     "Josep López Camunas",
 ]
 
+# News older than this gets a build warning (set "expires" on an item to hide it automatically)
+NEWS_STALE_MONTHS = 18
+
 # Files/folders copied verbatim into _site/
 STATIC = ["style.css", "site.js", "assets"]
+
+warnings = []
 
 
 # -------- Helpers --------
@@ -59,10 +66,19 @@ def is_me(author):
     return any(title_key(n) == a for n in MY_AUTHOR_NAMES)
 
 
-def split_authors(author_str):
-    """'A and B and C' (BibTeX style) -> [{'name': 'A', 'me': False}, ...]"""
+def split_authors(author_str, my_name):
+    """'A and B and C' (BibTeX style) -> [{'name': 'A', 'me': False}, ...], with your name normalized."""
     parts = [p.strip() for p in re.split(r"\s+and\s+", author_str or "", flags=re.I)]
-    return [{"name": p, "me": is_me(p)} for p in parts if p]
+    return [{"name": my_name if is_me(p) else p, "me": is_me(p)} for p in parts if p]
+
+
+def trim_to_sentence(text):
+    """Drop a trailing partial sentence left by truncated abstracts."""
+    text = (text or "").strip()
+    if not text or text.endswith((".", "!", "?")):
+        return text
+    cut = max(text.rfind(". "), text.rfind("? "), text.rfind("! "))
+    return text[: cut + 1] if cut > 0 else ""
 
 
 def image_size(rel_path):
@@ -83,6 +99,20 @@ def webp_variant(rel_path):
     return webp.as_posix() if (ROOT / webp).exists() and webp.as_posix() != rel_path else ""
 
 
+def link_label(url):
+    host = urlparse(url).netloc.lower()
+    for domain, label in [
+        ("arxiv.org", "arXiv"),
+        ("openreview.net", "OpenReview"),
+        ("thecvf.com", "CVF"),
+        ("doi.org", "DOI"),
+        ("github.com", "Code"),
+    ]:
+        if host == domain or host.endswith("." + domain):
+            return label
+    return "Paper"
+
+
 def make_bibtex(pub):
     authors = pub["authorList"]
     first = authors[0]["name"].split()[-1] if authors else "anon"
@@ -100,6 +130,9 @@ def make_bibtex(pub):
         lines.append(f"  {field} = {{{venue}}},")
     if pub.get("year"):
         lines.append(f"  year = {{{pub['year']}}},")
+    doi = re.sub(r"^https?://(dx\.)?doi\.org/", "", (pub.get("links") or {}).get("doi", ""))
+    if doi:
+        lines.append(f"  doi = {{{doi}}},")
     lines.append("}")
     return "\n".join(lines)
 
@@ -114,7 +147,7 @@ def obfuscate_email(email):
 # -------- Publications --------
 
 
-def build_publications():
+def build_publications(my_name):
     pubs = load("publications.json", []) or []
     extras = {title_key(e["title"]): e for e in (load("pub_extras.json", {}) or {}).get("extras", []) if e.get("title")}
 
@@ -123,25 +156,39 @@ def build_publications():
         extra = extras.get(title_key(pub.get("title")), {})
         links = pub.get("links") or {}
         p = dict(pub)
-        p["authorList"] = split_authors(pub.get("authors"))
+        p["authorList"] = split_authors(pub.get("authors"), my_name)
         p["venueShort"] = extra.get("venueShort", "")
+        p["tldr"] = extra.get("tldr", "")
+        p["summary"] = trim_to_sentence(pub.get("summary"))
         image = extra.get("image", "")
         p["image"] = image
         p["imageWebp"] = webp_variant(image)
         p["imageWidth"], p["imageHeight"] = image_size(image)
-        # Chips, in display order: Project / Code / PDF / DOI / Paper
-        chips = [
+
+        # Chips in display order; each labelled by where it goes, duplicates dropped
+        candidates = [
             ("Project", extra.get("project")),
             ("Code", extra.get("code") or links.get("code")),
+            (None, links.get("arxiv")),
             ("PDF", links.get("pdf")),
+            (None, links.get("scholar")),  # venue / landing page
             ("DOI", links.get("doi")),
-            ("Paper", links.get("scholar")),
         ]
-        p["chips"] = [{"label": l, "url": u} for l, u in chips if u]
-        # Title link: prefer Project -> PDF -> Paper -> Code -> DOI
-        by_label = {c["label"]: c["url"] for c in p["chips"]}
+        chips, seen = [], set()
+        for label, url in candidates:
+            if not url or url in seen:
+                continue
+            seen.add(url)
+            chips.append({"label": label or link_label(url), "url": url})
+        p["chips"] = chips
+
+        # Title link: Project -> arXiv -> venue page -> PDF -> DOI -> Code
+        by_label = {}
+        for c in chips:
+            by_label.setdefault(c["label"], c["url"])
         p["primaryUrl"] = next(
-            (by_label[l] for l in ("Project", "PDF", "Paper", "Code", "DOI") if l in by_label), ""
+            (by_label[l] for l in ("Project", "arXiv", "OpenReview", "CVF", "Paper", "PDF", "DOI", "Code") if l in by_label),
+            "",
         )
         p["bibtex"] = extra.get("bibtex") or make_bibtex(p)
         out.append(p)
@@ -155,6 +202,98 @@ def build_publications():
             groups.append({"year": label, "pubs": []})
         groups[-1]["pubs"].append(p)
     return out, groups
+
+
+# -------- News --------
+
+
+def build_news(items, today):
+    """Hide expired items; warn about expired or very old ones so the page doesn't go stale."""
+    out = []
+    for item in items:
+        expires = item.get("expires")
+        if expires and date.fromisoformat(expires) < today:
+            warnings.append(f"news: hiding expired item [{item.get('label')}] {item.get('text', '')[:60]}")
+            continue
+        m = re.match(r"(\d{4})\.(\d{1,2})", item.get("label", ""))
+        if m:
+            age = (today.year - int(m.group(1))) * 12 + today.month - int(m.group(2))
+            if age > NEWS_STALE_MONTHS:
+                warnings.append(f"news: [{item['label']}] is {age} months old, consider removing it")
+        out.append(item)
+    return out
+
+
+# -------- Link-preview image --------
+
+
+def make_og_image(info, avatar, out_path):
+    """Draw a 1200x630 preview card in the site's retro-window style."""
+    if not Image:
+        warnings.append("Pillow not installed: skipping the link-preview image")
+        return False
+
+    W, H = 1200, 630
+    ink, muted, accent = (17, 24, 39), (75, 85, 99), (0, 94, 255)
+    img = Image.new("RGB", (W, H), (238, 242, 255))
+    d = ImageDraw.Draw(img)
+
+    for x in range(0, W, 24):  # grid background
+        d.line([(x, 0), (x, H)], fill=(226, 230, 244))
+    for y in range(0, H, 24):
+        d.line([(0, y), (W, y)], fill=(226, 230, 244))
+
+    # Card with hard offset shadow
+    x0, y0, x1, y1 = 56, 56, W - 64, H - 64
+    d.rounded_rectangle([x0 + 10, y0 + 10, x1 + 10, y1 + 10], 10, fill=(60, 66, 84))
+    d.rounded_rectangle([x0, y0, x1, y1], 10, fill=(253, 253, 253), outline=ink, width=4)
+
+    # Avatar in a framed box
+    size = 330
+    ax, ay = x0 + 48, y0 + (y1 - y0 - size) // 2
+    d.rectangle([ax - 12, ay - 12, ax + size + 12, ay + size + 12], fill=(229, 231, 235), outline=ink, width=4)
+    if avatar and (ROOT / avatar).exists():
+        with Image.open(ROOT / avatar) as a:
+            img.paste(a.convert("RGB").resize((size, size), Image.LANCZOS), (ax, ay))
+
+    pixel = lambda s: ImageFont.truetype(str(FONTS / "PressStart2P-Regular.ttf"), s)
+    mono = lambda s, w="Regular": ImageFont.truetype(str(FONTS / f"IBMPlexMono-{w}.ttf"), s)
+
+    tx = ax + size + 60
+    max_w = x1 - tx - 40
+
+    def wrap(text, font):
+        lines, line = [], ""
+        for word in text.split():
+            test = (line + " " + word).strip()
+            if d.textlength(test, font=font) <= max_w or not line:
+                line = test
+            else:
+                lines.append(line)
+                line = word
+        return lines + ([line] if line else [])
+
+    y = y0 + 70
+    f = pixel(38)
+    for line in wrap(info.get("name", ""), f):
+        d.text((tx, y), line, font=f, fill=ink)
+        y += 58
+    y += 18
+    f = mono(28, "SemiBold")
+    for line in wrap(info.get("title", ""), f):
+        d.text((tx, y), line, font=f, fill=ink)
+        y += 38
+    y += 14
+    f = mono(24)
+    for line in wrap(info.get("affiliation", ""), f):
+        d.text((tx, y), line, font=f, fill=muted)
+        y += 34
+
+    d.text((tx, y1 - 70), urlparse(SITE_URL).netloc, font=pixel(20), fill=accent)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out_path, optimize=True)
+    return True
 
 
 # -------- Structured data --------
@@ -175,6 +314,8 @@ def json_ld(info, rrss, pubs):
         "@type": "Person",
         "@id": SITE_URL + "#me",
         "name": info.get("name"),
+        "alternateName": [n for n in MY_AUTHOR_NAMES if n != info.get("name")],
+        "description": info.get("tagline"),
         "jobTitle": info.get("title"),
         "url": SITE_URL,
         "image": SITE_URL + info["avatarUrl"] if info.get("avatarUrl") else None,
@@ -190,6 +331,7 @@ def json_ld(info, rrss, pubs):
             "datePublished": str(p["year"]) if p.get("year") else None,
             "isPartOf": p.get("venue") or None,
             "url": p.get("primaryUrl") or None,
+            "sameAs": (p.get("links") or {}).get("doi") or None,
             "abstract": p.get("summary") or None,
         }
         for p in pubs
@@ -211,12 +353,13 @@ def json_ld(info, rrss, pubs):
 
 
 def main():
+    today = date.today()
     info = load("personal_info.json", {})
     rrss = load("rrss.json", {})
-    news = (load("news.json", {}) or {}).get("news", [])
+    news = build_news((load("news.json", {}) or {}).get("news", []), today)
     activities = load("activities.json", {})
     misc = load("misc.json", {})
-    pubs, pub_groups = build_publications()
+    pubs, pub_groups = build_publications(info.get("name", ""))
 
     social = []
     if rrss.get("github"):
@@ -236,18 +379,25 @@ def main():
     avatar = info.get("avatarUrl", "")
     avatar_w, avatar_h = image_size(avatar)
 
+    if OUT.exists():
+        shutil.rmtree(OUT)
+    OUT.mkdir()
+
+    og_image = "assets/og.png" if make_og_image(info, avatar, OUT / "assets" / "og.png") else ""
+
     ctx = {
         "site_url": SITE_URL,
         "info": info,
         "affiliation": affiliation,
+        "tagline": info.get("tagline", ""),
         "about": [Markup(p) for p in info.get("aboutParagraphs", [])],  # trusted HTML
-        "description": " ".join(
-            filter(None, [info.get("title"), "at", info.get("affiliation")])
-        ),
+        "description": info.get("tagline")
+        or " ".join(filter(None, [info.get("title"), "at", info.get("affiliation")])),
         "avatar": avatar,
         "avatar_webp": webp_variant(avatar),
         "avatar_w": avatar_w,
         "avatar_h": avatar_h,
+        "og_image": og_image,
         "emails": [e for e in (obfuscate_email(info.get("primaryEmail")), obfuscate_email(info.get("secondaryEmail"))) if e],
         "social": social,
         "twitter_handle": twitter_handle,
@@ -255,11 +405,14 @@ def main():
         "teaching": activities.get("teaching", []),
         "awards": activities.get("awards", []),
         "service": activities.get("service", []),
+        "talks": activities.get("talks", []),
+        "projects": activities.get("projects", []),
         "footer_note": misc.get("footerNote", "Hosted on GitHub Pages"),
+        "goatcounter": misc.get("goatcounterCode", ""),
         "pub_groups": pub_groups,
         "json_ld": json_ld(info, rrss, pubs),
-        "year": date.today().year,
-        "today": date.today().isoformat(),
+        "year": today.year,
+        "today": today.isoformat(),
     }
 
     env = Environment(
@@ -268,10 +421,6 @@ def main():
         trim_blocks=True,
         lstrip_blocks=True,
     )
-
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    OUT.mkdir()
 
     for name, out_name in [
         ("index.html.j2", "index.html"),
@@ -286,10 +435,12 @@ def main():
     for item in STATIC:
         src = ROOT / item
         if src.is_dir():
-            shutil.copytree(src, OUT / item, ignore=shutil.ignore_patterns("*:Zone.Identifier"))
+            shutil.copytree(src, OUT / item, dirs_exist_ok=True, ignore=shutil.ignore_patterns("*:Zone.Identifier"))
         elif src.exists():
             shutil.copy2(src, OUT / item)
 
+    for w in warnings:
+        print("WARNING:", w)
     print(f"Built {OUT.relative_to(ROOT)}/ ({len(pubs)} publications, {len(news)} news items)")
 
 

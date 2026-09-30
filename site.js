@@ -14,7 +14,7 @@ function initEmails() {
 // -------- Scrollspy for the sections nav --------
 
 function initScrollspy() {
-    const links = Array.from(document.querySelectorAll(".sections-nav .nav-link"));
+    const links = Array.from(document.querySelectorAll(".sections-nav .nav-link-compact"));
     const sections = links
         .map(function (link) {
             return document.querySelector(link.getAttribute("href"));
@@ -75,6 +75,36 @@ function initBibtexCopy() {
     });
 }
 
+// -------- Figure lightbox --------
+// Without JS the figure links simply open the image in a new tab.
+
+function initLightbox() {
+    const dialog = document.getElementById("lightbox");
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    const img = dialog.querySelector(".lightbox-img");
+    let opener = null;
+
+    document.querySelectorAll(".pub-figure-link").forEach(function (link) {
+        link.addEventListener("click", function (e) {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // keep "open in new tab"
+            e.preventDefault();
+            opener = link;
+            img.src = link.getAttribute("href");
+            img.alt = link.querySelector("img").alt;
+            dialog.showModal();
+        });
+    });
+
+    // Clicking the backdrop (outside the image and button) closes it
+    dialog.addEventListener("click", function (e) {
+        if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", function () {
+        img.removeAttribute("src");
+        if (opener) opener.focus();
+    });
+}
+
 // -------- Theme toggle (light / dark) --------
 
 function initThemeToggle() {
@@ -107,5 +137,6 @@ document.addEventListener("DOMContentLoaded", function () {
     initEmails();
     initScrollspy();
     initBibtexCopy();
+    initLightbox();
     initThemeToggle();
 });

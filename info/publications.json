@@ -6,10 +6,11 @@
         "year": 2025,
         "summary": "When a vision model performs image recognition, which visual attributes drive its predictions? Detecting unintended reliance on specific visual features is critical for ensuring model robustness, preventing overfitting, and avoiding spurious correlations. We introduce an automated framework for detecting such dependencies in trained vision models. ",
         "links": {
-            "pdf": "",
-            "doi": "",
+            "pdf": "https://arxiv.org/pdf/2510.21704",
+            "doi": "https://doi.org/10.52202/085713-4730",
             "code": "",
-            "scholar": "https://arxiv.org/abs/2510.21704"
+            "scholar": "https://arxiv.org/abs/2510.21704",
+            "arxiv": "https://arxiv.org/abs/2510.21704"
         }
     },
     {
@@ -17,12 +18,13 @@
         "authors": "Josep López Camuñas and Cristina Bustos and Yanjun Zhu and Raquel Ros and Agata Lapedriza",
         "venue": "Proceedings of the Winter Conference on Applications of Computer Vision",
         "year": 2025,
-        "summary": "Understanding emotional signals in older adults is crucial for designing virtual assistants that support their well-being. However existing affective computing models often face significant limitations:(1) limited availability of datasets representing older adults especially in non-English-speaking populations and (2) poor generalization of models ",
+        "summary": "Understanding emotional signals in older adults is crucial for designing virtual assistants that support their well-being. However, existing affective computing models often face significant limitations: (1) limited availability of datasets representing older adults, especially in non-English-speaking populations, and (2) poor generalization of models trained on younger or homogeneous demographics. To address these gaps, this study evaluates state-of-the-art affective computing models -- including facial expression recognition, text sentiment analysis, and smile detection -- using videos of older adults interacting with either a person or a virtual avatar. As part of this effort, we introduce a novel dataset featuring Spanish-speaking older adults engaged in human-to-human video interviews. Through three comprehensive analyses, we investigate (1) the alignment between human-annotated labels and automatic model outputs, (2) the relationships between model outputs across different modalities, and (3) individual variations in emotional signals. Using both the Wizard of Oz (WoZ) dataset and our newly collected dataset, we uncover limited agreement between human annotations and model predictions, weak consistency across modalities, and significant variability among individuals. These findings highlight the shortcomings of generalized emotion perception models and emphasize the need of incorporating personal variability and cultural nuances into future systems.",
         "links": {
-            "pdf": "",
-            "doi": "",
+            "pdf": "https://arxiv.org/pdf/2501.16870",
+            "doi": "https://doi.org/10.1109/wacvw65960.2025.00006",
             "code": "",
-            "scholar": "https://openaccess.thecvf.com/content/WACV2025W/CV4Small/html/Camunas_Experimenting_with_Affective_Computing_Models_in_Video_Interviews_with_Spanish-speaking_WACVW_2025_paper.html"
+            "scholar": "https://openaccess.thecvf.com/content/WACV2025W/CV4Small/html/Camunas_Experimenting_with_Affective_Computing_Models_in_Video_Interviews_with_Spanish-speaking_WACVW_2025_paper.html",
+            "arxiv": "https://arxiv.org/abs/2501.16870"
         }
     },
     {

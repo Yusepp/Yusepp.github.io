@@ -1,3 +1,44 @@
+/* ---------- Fonts (self-hosted, OFL — see assets/fonts/) ---------- */
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("assets/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("assets/fonts/IBMPlexMono-Italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("assets/fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("assets/fonts/IBMPlexMono-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Press Start 2P";
+    src: url("assets/fonts/PressStart2P-Regular.woff2") format("woff2");
+    font-display: swap;
+}
+@font-face {
+    font-family: "Share Tech Mono";
+    src: url("assets/fonts/ShareTechMono-Regular.woff2") format("woff2");
+    font-display: swap;
+}
+
 /* ---------- Theme tokens ---------- */
 
 :root {
@@ -30,11 +71,7 @@
     --nav-link: #1f2937;
     --nav-link-bg: #ffffff;
     --focus: #f59e0b;
-
-    /* Keep Bootstrap components in sync with our palette */
-    --bs-body-color: var(--text-main);
-    --bs-body-bg: var(--bg-body);
-    --bs-border-color: #d4d4d8;
+    --border-soft: #d4d4d8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -63,7 +100,7 @@
         --nav-bg: linear-gradient(180deg, #334155 0%, #1e293b 70%, #0f172a 100%);
         --nav-link: #e5e7eb;
         --nav-link-bg: #0f172a;
-        --bs-border-color: #334155;
+        --border-soft: #334155;
     }
 }
 
@@ -92,22 +129,56 @@
     --nav-bg: linear-gradient(180deg, #334155 0%, #1e293b 70%, #0f172a 100%);
     --nav-link: #e5e7eb;
     --nav-link-bg: #0f172a;
-    --bs-border-color: #334155;
+    --border-soft: #334155;
 }
 
-/* ---------- Global ---------- */
+/* ---------- Reset & global ---------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 4.5rem; /* keep headings clear of the sticky nav */
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
+    margin: 0;
     -webkit-font-smoothing: antialiased;
     color: var(--text-main);
     font-family: var(--font-body);
     font-size: 0.95rem;
     line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin-top: 0;
+    line-height: 1.3;
+}
+
+p {
+    margin: 0 0 1rem;
+}
+
+img {
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+}
+
+strong {
+    font-weight: 700;
 }
 
 /* subtle grid background */
@@ -119,8 +190,43 @@ body {
     background-size: 12px 12px;
 }
 
-.container-xxl {
+/* ---------- Layout ---------- */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.page-main {
+    flex: 1;
+}
+
+.layout,
+.footer-inner {
     max-width: 1320px;
+    margin: 0 auto;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        align-items: start;
+    }
+}
+
+.content > * + * {
+    margin-top: 1rem;
 }
 
 a {
@@ -154,6 +260,7 @@ a:hover {
 
 .sidebar-card,
 .card-section {
+    padding: 1rem;
     border-radius: 6px;
     border: 2px solid var(--border-strong);
     background: var(--bg-card);
@@ -196,7 +303,7 @@ a:hover {
 
 /* ---------- Sidebar profile ---------- */
 
-.sidebar-card .card-body {
+.sidebar-card {
     text-align: center;
 }
 
@@ -204,9 +311,29 @@ a:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 1rem;
+}
+
+.sidebar-block {
+    margin-bottom: 1rem;
+}
+.sidebar-block:last-child {
+    margin-bottom: 0.25rem;
+}
+.sidebar-block .profile-text + .profile-text {
+    margin-top: 0.25rem;
+}
+
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 .profile-photo-wrapper {
+    margin-bottom: 0.5rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -365,6 +492,12 @@ a:hover {
 .section-body p {
     margin-bottom: 0.7rem;
 }
+.section-body .about-lead {
+    font-weight: 600;
+    font-size: 1rem;
+    padding-left: 0.7rem;
+    border-left: 3px solid var(--accent);
+}
 .section-body p:last-child {
     margin-bottom: 0;
 }
@@ -382,6 +515,7 @@ a:hover {
 
 .news-list {
     padding-left: 0;
+    list-style: none;
 }
 .news-list li {
     display: grid;
@@ -498,6 +632,11 @@ a:hover {
     color: var(--text-main);
 }
 
+.pub-tldr {
+    font-size: 0.9rem;
+    margin: 0.45rem 0 0;
+}
+
 /* Links + Abstract/BibTeX toggles share one wrapping row; an opened panel takes a full line */
 .pub-card-chips {
     display: flex;
@@ -546,6 +685,7 @@ a:hover {
     margin-top: 0.5rem;
 }
 .pub-bibtex {
+    font-family: var(--font-body);
     font-size: 0.8rem;
     margin: 0;
     padding: 0.6rem 0.7rem;
@@ -566,8 +706,16 @@ a:hover {
 }
 
 .pub-card-image-block {
-    margin: 0.5rem 0 0.4rem;
+    margin: 0.6rem 0 0.4rem;
     text-align: center;
+}
+
+/* Figure opens in a lightbox (or a new tab without JS); sits above the card's link overlay */
+.pub-figure-link {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    cursor: zoom-in;
 }
 
 .pub-card-image {
@@ -577,6 +725,58 @@ a:hover {
     border-radius: 4px;
     border: 1px solid var(--border-strong);
     background: #fff; /* figures have transparent backgrounds; keep them legible in dark mode */
+}
+
+.pub-figure-hint {
+    position: absolute;
+    right: 0.4rem;
+    bottom: 0.4rem;
+    padding: 0 0.4rem;
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    color: #fff;
+    background: rgba(17, 24, 39, 0.8);
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+.pub-figure-link:hover .pub-figure-hint,
+.pub-figure-link:focus-visible .pub-figure-hint {
+    opacity: 1;
+}
+@media (hover: none) {
+    .pub-figure-hint {
+        opacity: 1;
+    }
+}
+
+/* ---------- Lightbox ---------- */
+
+.lightbox {
+    max-width: 95vw;
+    max-height: 92vh;
+    padding: 0.6rem;
+    border: 2px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--bg-card);
+    box-shadow: 6px 6px 0 var(--shadow);
+}
+.lightbox::backdrop {
+    background: rgba(2, 6, 23, 0.75);
+}
+.lightbox form {
+    text-align: right;
+    margin-bottom: 0.4rem;
+}
+.lightbox-img {
+    display: block;
+    max-width: calc(95vw - 1.6rem);
+    max-height: calc(92vh - 4rem);
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 4px;
 }
 
 /* ---------- Sections nav ---------- */
@@ -600,6 +800,10 @@ a:hover {
 }
 
 .sections-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
@@ -625,7 +829,14 @@ a:hover {
     }
 }
 
+.nav-links {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
 .nav-link-compact {
+    display: block;
+    text-decoration: none !important;
     padding: 0.15rem 0.7rem;
     font-size: 0.9rem;
     white-space: nowrap;
@@ -653,6 +864,7 @@ a:hover {
 
 .theme-toggle {
     flex: none;
+    margin-left: auto;
     width: 2rem;
     height: 2rem;
     border-radius: 999px;
@@ -665,17 +877,32 @@ a:hover {
 
 /* ---------- 404 ---------- */
 
+.not-found-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem;
+}
+
 .not-found {
     max-width: 480px;
     width: 100%;
+    text-align: center;
 }
 
 /* ---------- Footer ---------- */
 
-.footer-text {
-    background: transparent;
+.site-footer {
+    border-top: 1px solid var(--border-soft);
+    padding: 1rem 0;
     font-size: 0.8rem;
     color: var(--text-muted);
+}
+
+.footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 /* ---------- Reduced motion ---------- */

@@ -76,7 +76,7 @@ function initBibtexCopy() {
 }
 
 // -------- Figure lightbox --------
-// Without JS the figure links simply open the image in a new tab.
+// Clicking a figure only enlarges it; it never navigates anywhere.
 
 function initLightbox() {
     const dialog = document.getElementById("lightbox");
@@ -84,13 +84,11 @@ function initLightbox() {
     const img = dialog.querySelector(".lightbox-img");
     let opener = null;
 
-    document.querySelectorAll(".pub-figure-link").forEach(function (link) {
-        link.addEventListener("click", function (e) {
-            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // keep "open in new tab"
-            e.preventDefault();
-            opener = link;
-            img.src = link.getAttribute("href");
-            img.alt = link.querySelector("img").alt;
+    document.querySelectorAll(".pub-figure-link").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            opener = btn;
+            img.src = btn.dataset.full;
+            img.alt = btn.querySelector("img").alt;
             dialog.showModal();
         });
     });

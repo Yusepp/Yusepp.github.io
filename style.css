@@ -218,10 +218,10 @@ strong {
     padding-bottom: 1.5rem;
 }
 
+/* Both columns stretch to full height, so the sidebar card can stay sticky while the content scrolls */
 @media (min-width: 768px) {
     .layout {
         grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-        align-items: start;
     }
 }
 
@@ -710,11 +710,15 @@ a:hover {
     text-align: center;
 }
 
-/* Figure opens in a lightbox (or a new tab without JS); sits above the card's link overlay */
+/* Figure button: clicking only enlarges it (lightbox); sits above the card's link overlay */
 .pub-figure-link {
     position: relative;
     z-index: 1;
     display: inline-block;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
     cursor: zoom-in;
 }
 

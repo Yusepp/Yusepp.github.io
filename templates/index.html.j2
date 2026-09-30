@@ -200,7 +200,7 @@
 
                                     {% if pub.image %}
                                     <div class="pub-card-image-block">
-                                        <a class="pub-figure-link" href="{{ pub.imageWebp or pub.image }}" target="_blank" rel="noopener" aria-label="Enlarge figure for “{{ pub.title }}”">
+                                        <button type="button" class="pub-figure-link" data-full="{{ pub.imageWebp or pub.image }}" aria-label="Enlarge figure for “{{ pub.title }}”">
                                             <picture>
                                                 {% if pub.imageWebp %}
                                                 <source srcset="{{ pub.imageWebp }}" type="image/webp" />
@@ -215,7 +215,7 @@
                                                 />
                                             </picture>
                                             <span class="pub-figure-hint" aria-hidden="true">⤢ Enlarge</span>
-                                        </a>
+                                        </button>
                                     </div>
                                     {% endif %}
 

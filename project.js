@@ -118,7 +118,18 @@ function initCopy() {
     });
 }
 
+// -------- Videos: no autoplay for visitors who prefer reduced motion --------
+
+function initVideos() {
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.querySelectorAll("video[autoplay]").forEach(function (v) {
+        v.removeAttribute("autoplay");
+        v.pause();
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    initVideos();
     document.querySelectorAll("[data-explorer]").forEach(initExplorer);
     initDetailsToggle();
     initCopy();

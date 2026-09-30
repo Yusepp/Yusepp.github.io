@@ -18,7 +18,8 @@
 <figure class="figure" id="fig-{{ id }}">
     {% if m.exists %}
         {% if m.kind == "video" %}
-        <video class="figure-media" src="{{ m.src }}" autoplay muted loop playsinline style="aspect-ratio: {{ m.aspect }}"></video>
+        {# Native controls: play/pause, timeline scrubbing, fullscreen. Autoplay is skipped for reduced motion (project.js). #}
+        <video class="figure-media" src="{{ m.src }}"{% if m.poster %} poster="{{ m.poster }}"{% endif %} controls autoplay muted loop playsinline preload="metadata" aria-label="{{ m.caption or m.todo }}" style="aspect-ratio: {{ m.aspect }}"></video>
         {% else %}
         <picture>
             {% if m.webp %}<source srcset="{{ m.webp }}" type="image/webp" />{% endif %}

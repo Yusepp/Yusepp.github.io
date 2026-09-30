@@ -2,7 +2,7 @@
     {
         "title": "Automated Detection of Visual Attribute Reliance with a Self-Reflective Agent",
         "authors": "Christy Li and Josep Lopez Camuñas and Jake Thomas Touchet and Jacob Andreas and Agata Lapedriza and Antonio Torralba and Tamar Rott Shaham",
-        "venue": "arXiv preprint arXiv:2510.21704",
+        "venue": "Advances in Neural Information Processing Systems (NeurIPS 2025)",
         "year": 2025,
         "summary": "When a vision model performs image recognition, which visual attributes drive its predictions? Detecting unintended reliance on specific visual features is critical for ensuring model robustness, preventing overfitting, and avoiding spurious correlations. We introduce an automated framework for detecting such dependencies in trained vision models. ",
         "links": {
@@ -29,7 +29,7 @@
         "title": "OpenMAIA: a Multimodal Automated Interpretability Agent based on open-source models",
         "authors": "Josep Lopez Camuñas and Christy Li and Tamar Rott Shaham and Antonio Torralba and Agata Lapedriza",
         "venue": "Mechanistic Interpretability Workshop at NeurIPS 2025",
-        "year": null,
+        "year": 2025,
         "summary": "Interpreting the internal mechanisms of large neural networks remains a main challenge for trustworthy AI. Recent works such as MAIA (a Multimodal Automated Interpretability Agent) have shown that agent-based systems can iteratively generate and test hypotheses about neuron function without the need for human intervention, which offers a scalable s",
         "links": {
             "pdf": "",

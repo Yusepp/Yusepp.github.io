@@ -1,17 +1,33 @@
-import json
-from pathlib import Path
+"""
+Pull publications from Google Scholar and MERGE them into info/publications.json.
 
-from scholarly import scholarly  # pip install scholarly
+Existing entries are matched by normalized title and never lose data:
+only empty fields are filled in, so hand-curated venues, years and links survive.
+New papers are appended. If Scholar blocks the request, the file is left untouched.
+"""
+
+import json
+import re
+import sys
+import unicodedata
+from pathlib import Path
 
 # Replace with your Scholar user id (the 'user=XXXX' part of your profile URL)
 SCHOLAR_USER_ID = "cHzwkWMAAAAJ"
 MAX_PAPERS = 40  # adjust as you like
+
+OUT_PATH = Path(__file__).resolve().parent.parent / "info" / "publications.json"
 
 # Papers you always want to skip (case-insensitive, checked in title + venue)
 SKIP_PATTERNS = [
     "wacvw 2025",
     "predictive maintenance using deep learning",
 ]
+
+
+def title_key(title):
+    t = unicodedata.normalize("NFKD", title or "").encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", " ", t.lower()).strip()
 
 
 def should_skip_paper(title: str, venue: str) -> bool:
@@ -23,6 +39,8 @@ def should_skip_paper(title: str, venue: str) -> bool:
 
 
 def fetch_publications(user_id: str, max_papers: int = 40):
+    from scholarly import scholarly  # pip install scholarly
+
     author = scholarly.search_author_id(user_id)
     author = scholarly.fill(author, sections=["publications"])
 
@@ -33,11 +51,12 @@ def fetch_publications(user_id: str, max_papers: int = 40):
 
         bib = pub.get("bib", {})
         title = bib.get("title", "").strip()
-        authors = bib.get("author", "")  # often "Last, F.; Last, F."
+        authors = bib.get("author", "")
         venue = (
             bib.get("venue", "")
             or bib.get("journal", "")
             or bib.get("conference", "")
+            or bib.get("citation", "")
             or ""
         )
         year = bib.get("pub_year") or bib.get("year")
@@ -51,10 +70,6 @@ def fetch_publications(user_id: str, max_papers: int = 40):
             print(f"Skipping blacklisted publication: {title} ({venue})")
             continue
 
-        # Try to find an accessible URL
-        pdf_url = pub.get("eprint_url") or ""
-        scholar_url = pub.get("pub_url") or ""
-
         pubs_out.append(
             {
                 "title": title,
@@ -63,10 +78,10 @@ def fetch_publications(user_id: str, max_papers: int = 40):
                 "year": year,
                 "summary": (bib.get("abstract", "") or "")[:350],
                 "links": {
-                    "pdf": pdf_url,
+                    "pdf": pub.get("eprint_url") or "",
                     "doi": "",  # you can enrich this manually later
-                    "code": "",  # optional: match by title to GitHub repos
-                    "scholar": scholar_url,
+                    "code": "",
+                    "scholar": pub.get("pub_url") or "",
                 },
             }
         )
@@ -74,16 +89,52 @@ def fetch_publications(user_id: str, max_papers: int = 40):
     return pubs_out
 
 
-def main():
-    pubs = fetch_publications(SCHOLAR_USER_ID, MAX_PAPERS)
+def fill_empty(existing: dict, fresh: dict) -> bool:
+    """Copy values from fresh into existing only where existing is empty. Returns True if changed."""
+    changed = False
+    for k, v in fresh.items():
+        if isinstance(v, dict):
+            sub = existing.setdefault(k, {})
+            changed |= fill_empty(sub, v)
+        elif v not in (None, "") and existing.get(k) in (None, ""):
+            existing[k] = v
+            changed = True
+    return changed
 
-    out_path = Path("info/publications.json")
-    out_path.write_text(
-        json.dumps(pubs, ensure_ascii=False, indent=2),
+
+def merge(existing: list, fresh: list):
+    by_key = {title_key(p.get("title")): p for p in existing}
+    added = updated = 0
+    for pub in fresh:
+        key = title_key(pub["title"])
+        if not key:
+            continue
+        if key in by_key:
+            updated += fill_empty(by_key[key], pub)
+        else:
+            existing.append(pub)
+            by_key[key] = pub
+            added += 1
+    return existing, added, updated
+
+
+def main():
+    existing = json.loads(OUT_PATH.read_text(encoding="utf-8")) if OUT_PATH.exists() else []
+
+    try:
+        fresh = fetch_publications(SCHOLAR_USER_ID, MAX_PAPERS)
+    except Exception as err:  # Scholar often rate-limits / CAPTCHAs CI runners
+        print(f"Could not fetch from Google Scholar, leaving {OUT_PATH.name} unchanged: {err}")
+        return 0
+
+    merged, added, updated = merge(existing, fresh)
+    OUT_PATH.write_text(
+        json.dumps(merged, ensure_ascii=False, indent=4) + "\n",
         encoding="utf-8",
     )
-    print(f"Written {len(pubs)} publications to {out_path}")
+    print(f"{OUT_PATH.name}: {added} added, {updated} updated, {len(merged)} total")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -13,9 +13,6 @@
     "avatarUrl": "assets/avatar1.png",
     "cvUrl": "assets/josep_cv.pdf",
 
-    "openToInternships": true,
-    "internshipNote": "Currently looking for research internships in industry for Spring or Summer 2026.",
-
     "researchTopics": [
         "Multimodal Learning & Perception",
         "Emotion & Affect Understanding",

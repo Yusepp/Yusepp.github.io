@@ -1,0 +1,12 @@
+# Build output (deployed by .github/workflows/deploy.yml)
+_site/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Windows / WSL download markers
+*:Zone.Identifier
+Thumbs.db
+.DS_Store

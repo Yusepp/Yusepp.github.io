@@ -482,6 +482,7 @@ def main():
         "site_url": SITE_URL,
         "css_v": asset_version("style.css"),
         "js_v": asset_version("site.js"),
+        "cv_v": asset_version(info["cvUrl"]) if info.get("cvUrl") else "",  # new CV -> new URL, no stale cache
         "info": info,
         "affiliation": affiliation,
         "tagline": info.get("tagline", ""),

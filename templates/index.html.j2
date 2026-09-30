@@ -107,7 +107,7 @@
                             <div class="sidebar-block">
                                 <h2 class="section-label">CV</h2>
                                 <div class="profile-text">
-                                    <a href="{{ info.cvUrl }}" target="_blank" rel="noopener">Download CV (PDF)</a>
+                                    <a href="{{ info.cvUrl }}{% if cv_v %}?v={{ cv_v }}{% endif %}" target="_blank" rel="noopener">Download CV (PDF)</a>
                                 </div>
                             </div>
                             {% endif %}

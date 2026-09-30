@@ -85,6 +85,11 @@ async function renderVideo(browser, name) {
     );
     await page.close();
     console.log(`${OUTPUTS[name]}: ${frames} frames, ${scene.width}x${scene.height} @ ${FPS} fps`);
+    // Poster: the frame shown before playback / when autoplay is off (reduced motion)
+    const poster = out.replace(/\.mp4$/, "-poster.webp");
+    await run("ffmpeg", ["-y", "-loglevel", "error", "-ss", String(scene.poster ?? scene.duration / 2), "-i", out,
+        "-frames:v", "1", "-c:v", "libwebp", "-quality", "85", poster]);
+    console.log(`  + ${poster.split(/[\\/]/).pop()}`);
     if (wantGif) {
         // GIFs are for slides/READMEs only: kept out of media/ so they aren't deployed with the page
         mkdirSync(EXTRAS, { recursive: true });

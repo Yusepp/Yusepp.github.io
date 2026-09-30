@@ -362,6 +362,8 @@ def build_projects(env, today):
             slot["src"] = f"media/{slot['file']}"
             webp = path.with_suffix(".webp")
             slot["webp"] = f"media/{webp.name}" if slot["kind"] == "image" and webp.exists() else ""
+            poster = path.with_name(path.stem + "-poster.webp")  # still frame shown before/while paused
+            slot["poster"] = f"media/{poster.name}" if slot["kind"] == "video" and poster.exists() else ""
             if not slot["exists"]:
                 missing.append(slot["file"])
         if missing:

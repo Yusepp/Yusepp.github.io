@@ -9,7 +9,7 @@ Personal research homepage. All content lives in `info/*.json`. `scripts/build.p
 | `info/personal_info.json` | Name, `tagline` (also used for search/link previews), bio, emails, research topics, CV |
 | `info/rrss.json` | GitHub / Scholar / LinkedIn / X links |
 | `info/news.json` | News items, newest first. Add `"expires": "YYYY-MM-DD"` to hide one automatically |
-| `info/publications.json` | Papers, synced monthly from OpenAlex + Semantic Scholar (manual edits are kept) |
+| `info/publications.json` | Papers, synced monthly from OpenAlex + Semantic Scholar + arXiv, with Google Scholar as a fallback (manual edits are kept) |
 | `info/pub_extras.json` | Per-paper extras matched by title: `tldr`, `venueShort`, `image`, `project`, `code`, `bibtex` |
 | `info/activities.json` | `talks`, `projects`, `teaching`, `awards`, `service` (empty lists are hidden) |
 | `info/misc.json` | Footer note, `goatcounterCode` |
@@ -44,6 +44,6 @@ python -m http.server -d _site
 ## Automation
 
 - **Deploy:** pushing to `master` runs `.github/workflows/deploy.yml` (Settings → Pages → Source = GitHub Actions).
-- **Monthly:** `.github/workflows/update-publications.yml` merges new papers/links from OpenAlex and Semantic Scholar, redeploys if anything changed, and posts a dead-link report (lychee) in the run summary.
+- **Monthly:** `.github/workflows/update-publications.yml` merges new papers/links from OpenAlex and Semantic Scholar, full abstracts from arXiv, and anything still missing (e.g. OpenReview-only papers) from Google Scholar, then redeploys if anything changed, and posts a dead-link report (lychee) in the run summary.
 
 Fonts are self-hosted from Google Fonts' open-source repo (SIL OFL, licenses in `assets/fonts/`).

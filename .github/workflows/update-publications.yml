@@ -21,8 +21,12 @@ jobs:
               with:
                   python-version: "3.11"
 
-            # Standard library only, no install step needed
-            - name: Merge OpenAlex + Semantic Scholar results into info/publications.json
+            # OpenAlex + Semantic Scholar use only the standard library;
+            # scholarly enables the Google Scholar fallback (bibtexparser 2.x breaks it)
+            - name: Install Google Scholar fallback
+              run: pip install scholarly "bibtexparser<2"
+
+            - name: Merge OpenAlex + Semantic Scholar (+ Google Scholar fallback) into info/publications.json
               run: python scripts/update_publications.py
 
             - name: Commit and push if changed

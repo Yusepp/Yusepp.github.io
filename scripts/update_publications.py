@@ -1,12 +1,18 @@
 """
-Pull publications from OpenAlex and Semantic Scholar and MERGE them into info/publications.json.
+Pull publications from OpenAlex, Semantic Scholar and (as a fallback) Google Scholar,
+and MERGE them into info/publications.json.
 
-Both APIs are free, need no key, and (unlike Google Scholar) don't block CI runners.
+1. OpenAlex + Semantic Scholar: free APIs, no key, reliable from CI.
+2. arXiv: full abstracts for every paper those APIs link to an arXiv id.
+3. Google Scholar (optional, needs `pip install scholarly "bibtexparser<2"`): only asked about
+   papers the APIs don't know or have no complete abstract for (e.g. OpenReview-only workshop
+   papers), to keep requests minimal, since Google may block scrapers.
+
 Existing entries are matched by normalized title and never lose data:
 only empty fields are filled in, so hand-curated venues, years and links survive.
-New papers are appended. If both sources fail, the file is left untouched.
+New papers are appended. If every source fails, the file is left untouched.
 
-Standard library only:  python scripts/update_publications.py
+    python scripts/update_publications.py
 """
 
 import json
@@ -16,11 +22,13 @@ import time
 import unicodedata
 import urllib.error
 import urllib.request
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 # Author ids: https://openalex.org/authors?search=... and https://www.semanticscholar.org/search?q=...
 OPENALEX_AUTHOR_ID = "A5116077900"
 SEMANTIC_SCHOLAR_AUTHOR_ID = "2342502730"
+GOOGLE_SCHOLAR_USER_ID = "cHzwkWMAAAAJ"  # the 'user=XXXX' part of your Scholar profile URL
 CONTACT_EMAIL = "jlopezcamu@uoc.edu"  # OpenAlex "polite pool" (faster, more reliable)
 
 OUT_PATH = Path(__file__).resolve().parent.parent / "info" / "publications.json"
@@ -34,6 +42,11 @@ SKIP_PATTERNS = [
 def title_key(title):
     t = unicodedata.normalize("NFKD", title or "").encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]+", " ", t.lower()).strip()
+
+
+def abstract_complete(text):
+    """False for missing abstracts and ones cut off mid-sentence."""
+    return bool(text) and text.rstrip().endswith((".", "!", "?"))
 
 
 def should_skip_paper(title: str, venue: str) -> bool:
@@ -127,6 +140,55 @@ def fetch_semantic_scholar():
     return out
 
 
+def fetch_arxiv(arxiv_ids):
+    """Full abstracts straight from arXiv for every paper the other APIs linked to an arXiv id."""
+    ids = sorted({i for i in arxiv_ids if i})
+    if not ids:
+        return []
+    xml = urllib.request.urlopen(
+        urllib.request.Request(
+            "http://export.arxiv.org/api/query?max_results=100&id_list=" + ",".join(ids),
+            headers={"User-Agent": f"yusepp.github.io publication sync ({CONTACT_EMAIL})"},
+        ),
+        timeout=30,
+    ).read()
+    ns = {"a": "http://www.w3.org/2005/Atom"}
+    out = []
+    for entry in ET.fromstring(xml).findall("a:entry", ns):
+        clean = lambda s: re.sub(r"\s+", " ", s or "").strip()
+        p = empty_pub(clean(entry.findtext("a:title", "", ns)))
+        p["authors"] = " and ".join(clean(a.findtext("a:name", "", ns)) for a in entry.findall("a:author", ns))
+        p["summary"] = clean(entry.findtext("a:summary", "", ns))
+        m = re.search(r"abs/(\d{4}\.\d{4,5})", entry.findtext("a:id", "", ns))
+        if m:
+            p["links"]["arxiv"] = m.group(1)
+        out.append(p)
+    return out
+
+
+def fetch_google_scholar(needs):
+    """Fallback: only fill (one request each) the Scholar entries for which needs(title) is True."""
+    from scholarly import scholarly  # optional dependency, see module docstring
+
+    author = scholarly.fill(scholarly.search_author_id(GOOGLE_SCHOLAR_USER_ID), sections=["publications"])
+    out = []
+    for ref in author.get("publications", []):
+        if not needs(ref.get("bib", {}).get("title", "")):
+            continue
+        bib = scholarly.fill(ref).get("bib", {})
+        p = empty_pub((bib.get("title") or "").strip())
+        p["authors"] = bib.get("author", "")
+        p["venue"] = bib.get("venue") or bib.get("journal") or bib.get("conference") or ""
+        try:
+            p["year"] = int(bib.get("pub_year") or 0) or None
+        except ValueError:
+            pass
+        p["summary"] = bib.get("abstract", "")
+        p["links"]["pdf"] = ref.get("eprint_url") or ""
+        out.append(p)
+    return out
+
+
 # -------- Combine --------
 
 
@@ -192,10 +254,11 @@ def merge(existing: list, fresh: list):
             continue
         if key in by_key:
             cur = by_key[key]
-            # Full abstracts replace ones cut off mid-sentence by the old Scholar scraper
-            old = (cur.get("summary") or "").rstrip()
-            if old and not old.endswith((".", "!", "?")) and len(pub.get("summary", "")) > len(old):
-                cur["summary"] = pub["summary"]
+            # A longer complete abstract replaces a shorter one (the old Scholar scraper cut them at 350 chars)
+            old = (cur.get("summary") or "").strip()
+            new = (pub.get("summary") or "").strip()
+            if old and abstract_complete(new) and len(new) > len(old):
+                cur["summary"] = new
                 updated += 1
             updated += fill_empty(cur, pub)
         else:
@@ -216,6 +279,33 @@ def main():
             sources.append(pubs)
         except Exception as err:
             print(f"{name}: failed ({err}), continuing without it")
+
+    # arXiv: full abstracts for any paper linked to an arXiv id (ids may already be full URLs in the file)
+    arxiv_ids = [
+        re.sub(r".*/abs/", "", (p.get("links") or {}).get("arxiv") or "")
+        for p in existing + [p for pubs in sources for p in pubs]
+    ]
+    try:
+        pubs = fetch_arxiv(arxiv_ids)
+        print(f"arXiv: {len(pubs)} works")
+        sources.append(pubs)
+    except Exception as err:
+        print(f"arXiv: failed ({err}), continuing without it")
+
+    # Google Scholar fallback: one request for the paper list, then one per paper that is
+    # unknown to the APIs or still lacks a complete abstract
+    complete = set()
+    for p in existing + [p for pubs in sources for p in pubs]:
+        if abstract_complete(p.get("summary")):
+            complete.add(title_key(p.get("title")))
+    try:
+        pubs = fetch_google_scholar(lambda title: title_key(title) not in complete)
+        print(f"Google Scholar: {len(pubs)} works filled in")
+        sources.append(pubs)
+    except ImportError:
+        print('Google Scholar: skipped (pip install scholarly "bibtexparser<2" to enable)')
+    except Exception as err:
+        print(f"Google Scholar: failed ({err}), continuing without it")
 
     if not sources:
         print(f"No source available, leaving {OUT_PATH.name} unchanged")

@@ -6,6 +6,7 @@ Render the static site from the JSON files in info/ into _site/.
     python -m http.server -d _site
 """
 
+import hashlib
 import json
 import re
 import shutil
@@ -79,6 +80,12 @@ def trim_to_sentence(text):
         return text
     cut = max(text.rfind(". "), text.rfind("? "), text.rfind("! "))
     return text[: cut + 1] if cut > 0 else ""
+
+
+def asset_version(rel_path):
+    """Short content hash, appended as ?v= so browsers refetch a file whenever it changes."""
+    path = ROOT / rel_path
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:10] if path.exists() else ""
 
 
 def image_size(rel_path):
@@ -387,6 +394,8 @@ def main():
 
     ctx = {
         "site_url": SITE_URL,
+        "css_v": asset_version("style.css"),
+        "js_v": asset_version("site.js"),
         "info": info,
         "affiliation": affiliation,
         "tagline": info.get("tagline", ""),

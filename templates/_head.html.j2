@@ -16,7 +16,8 @@
         <link rel="preload" href="assets/fonts/IBMPlexMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
         <link rel="preload" href="assets/fonts/PressStart2P-Regular.woff2" as="font" type="font/woff2" crossorigin />
 
-        <link rel="stylesheet" href="style.css" />
+        <!-- ?v= is a content hash (scripts/build.py) so browsers never mix new HTML with a cached old stylesheet -->
+        <link rel="stylesheet" href="style.css?v={{ css_v }}" />
         {% if goatcounter %}
 
         <!-- Privacy-friendly visit counter (no cookies): https://www.goatcounter.com -->

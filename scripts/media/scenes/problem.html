@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="common.css" />
+<style>
+    .stage { width: 1920px; height: 840px; }
+    #photo { left: 717px; top: 40px; width: 486px; height: 740px; }
+    .card { position: absolute; width: 560px; padding: 18px 22px; border-radius: 16px; background: var(--panel);
+            border-left: 7px solid; font-size: 22px; line-height: 1.5; color: var(--soft); }
+    .card .emo { display: inline-block; margin-bottom: 8px; padding: 4px 18px; border-radius: 999px;
+                 font-size: 26px; font-weight: 700; color: #fff; }
+    .card q { quotes: "“" "”"; font-style: italic; }
+    #fear { left: 70px; top: 70px; border-color: #6b46c1; }
+    #fear .emo { background: #6b46c1; }
+    #sad { left: 70px; top: 470px; border-color: #3273dc; }
+    #sad .emo { background: #3273dc; }
+    #amu { left: 1290px; top: 200px; border-color: #d97706; }
+    #amu .emo { background: #d97706; }
+    .cue.f { border-color: #6b46c1; } .cue.s { border-color: #3273dc; } .cue.a { border-color: #d97706; }
+    #cap { position: absolute; left: 1290px; top: 640px; width: 560px; font-size: 21px; color: var(--muted); line-height: 1.45; }
+    svg { position: absolute; left: 0; top: 0; width: 1920px; height: 840px; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+    <div class="photo" id="photo"><img src="../../../projects/peqemo/media/explore-interior.jpg" alt="" /></div>
+    <div class="cue f" id="cf"></div>
+    <div class="cue s" id="cs"></div>
+    <div class="cue a" id="ca"></div>
+    <svg id="links"></svg>
+
+    <div class="card" id="fear"><span class="emo">Fear</span><br /><q id="qf"></q></div>
+    <div class="card" id="sad"><span class="emo">Sadness</span><br /><q id="qs"></q></div>
+    <div class="card" id="amu"><span class="emo">Amusement</span><br /><q id="qa"></q></div>
+    <div id="cap">Three readings of the same photo, each written by PeqEMO when asked for that emotion, and each pointing at something really in the picture.</div>
+</div>
+<script src="common.js"></script>
+<script>
+window.SCENE = { width: 1920, height: 840, duration: 0 };
+const $ = (id) => document.getElementById(id);
+
+// Verbatim excerpt of `text` from the first occurrence of `from` to the end of that sentence.
+function excerpt(text, from) {
+    text = text.replace(/\s+/g, " ");
+    const i = text.indexOf(from);
+    if (i < 0) throw new Error("phrase not found: " + from);
+    const end = text.indexOf(".", i);
+    return (i > 0 ? "…" : "") + text.slice(i, end + 1);
+}
+
+function link(cardId, cueId, side) {
+    const c = $(cardId).getBoundingClientRect(), q = $(cueId).getBoundingClientRect();
+    const sx = side === "right" ? c.right : c.left, sy = c.top + 40;
+    const tx = side === "right" ? q.left : q.right, ty = q.top + q.height / 2;
+    const col = getComputedStyle($(cardId)).borderLeftColor;
+    return `<path d="M${sx},${sy} C${(sx + tx) / 2},${sy} ${(sx + tx) / 2},${ty} ${tx},${ty}" stroke="${col}" stroke-width="4" fill="none"/>
+            <circle cx="${tx}" cy="${ty}" r="7" fill="${col}"/>`;
+}
+
+window.setup = function () {
+    const tr = (e) => justification("interior", e).trigger;
+    $("qf").textContent = excerpt(tr("Fear"), "the dark, shadowy interior create");
+    $("qs").textContent = excerpt(tr("Sadness"), "The chaotic pile of crumpled papers");
+    $("qa").textContent = excerpt(tr("Amusement"), "the formal, almost theatrical design");
+    placeCue($("cf"), $("photo"), { x: 0.02, y: 0.05, w: 0.34, h: 0.47 });
+    placeCue($("cs"), $("photo"), { x: 0.00, y: 0.60, w: 0.62, h: 0.39 });
+    placeCue($("ca"), $("photo"), { x: 0.48, y: 0.12, w: 0.41, h: 0.38 });
+    $("links").innerHTML = link("fear", "cf", "right") + link("sad", "cs", "right") + link("amu", "ca", "left");
+};
+window.seek = function () {};
+</script>
+</body>
+</html>

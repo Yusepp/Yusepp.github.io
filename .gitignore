@@ -6,6 +6,10 @@ __pycache__/
 *.pyc
 .venv/
 
+# Media rendering (scripts/media): dependencies and preview frames
+node_modules/
+scripts/media/preview/
+
 # Windows / WSL download markers
 *:Zone.Identifier
 Thumbs.db

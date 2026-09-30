@@ -1,0 +1,140 @@
+/* Shared look for rendered scenes: same fonts and palette as project.css. */
+@font-face {
+    font-family: "Noto Sans";
+    src: url("../../../assets/fonts/NotoSans-400.woff2") format("woff2");
+    font-weight: 400;
+}
+@font-face {
+    font-family: "Noto Sans";
+    src: url("../../../assets/fonts/NotoSans-600.woff2") format("woff2");
+    font-weight: 600;
+}
+@font-face {
+    font-family: "Noto Sans";
+    src: url("../../../assets/fonts/NotoSans-700.woff2") format("woff2");
+    font-weight: 700;
+}
+
+:root {
+    --text: #363636;
+    --soft: #4a4a4a;
+    --muted: #7a7a7a;
+    --line: #e6e6e6;
+    --panel: #f5f5f5;
+    --ours: #3273dc;
+    --perception: #3273dc;
+    --trigger: #9f5bd3;
+    --label: #2f855a;
+    --gt: #48c78e;
+}
+
+* {
+    box-sizing: border-box;
+}
+html,
+body {
+    margin: 0;
+    background: #fff;
+    color: var(--text);
+    font-family: "Noto Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+}
+.stage {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+}
+
+.kicker {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ours);
+}
+
+.photo {
+    position: absolute;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+.photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.cue {
+    position: absolute;
+    border: 5px solid var(--perception);
+    border-radius: 12px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
+}
+.cue span {
+    position: absolute;
+    left: -5px;
+    top: -44px;
+    padding: 3px 12px;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: #fff;
+    background: var(--perception);
+}
+.cue.is-trigger {
+    border-color: var(--trigger);
+}
+.cue.is-trigger span {
+    background: var(--trigger);
+}
+
+.tag {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+}
+.tag.perception {
+    background: var(--perception);
+}
+.tag.trigger {
+    background: var(--trigger);
+}
+.tag.label {
+    background: var(--label);
+}
+
+.chip {
+    display: inline-block;
+    padding: 6px 16px;
+    margin: 0 8px 10px 0;
+    border-radius: 999px;
+    border: 2px solid #d5d5d5;
+    font-size: 21px;
+    color: var(--soft);
+    background: #fff;
+}
+.chip.on {
+    background: var(--text);
+    border-color: var(--text);
+    color: #fff;
+}
+.chip.gt {
+    box-shadow: inset 0 0 0 3px var(--gt);
+}
+
+.caret {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: -0.15em;
+    background: currentColor;
+}

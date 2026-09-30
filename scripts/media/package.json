@@ -1,0 +1,12 @@
+{
+    "name": "peqemo-media",
+    "private": true,
+    "description": "Renders the /peqemo animations (HTML scenes -> frames -> ffmpeg MP4/PNG).",
+    "type": "module",
+    "scripts": {
+        "render": "node render.mjs"
+    },
+    "devDependencies": {
+        "playwright": "^1.55.0"
+    }
+}

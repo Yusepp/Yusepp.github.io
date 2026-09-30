@@ -3,6 +3,7 @@
         {
             "title": "Automated Detection of Visual Attribute Reliance with a Self-Reflective Agent",
             "venueShort": "NeurIPS 2025",
+            "tldr": "An agent that finds which visual attributes a trained vision model secretly relies on, by proposing hypotheses, testing them with experiments, and checking its own conclusions.",
             "image": "assets/papers/saia.png",
             "project": "https://christykl.github.io/saia-website/",
             "code": "https://github.com/christykl/saia"
@@ -10,6 +11,7 @@
         {
             "title": "Experimenting with Affective Computing Models in Video Interviews with Spanish-Speaking Older Adults",
             "venueShort": "WACV-W 2025",
+            "tldr": "Off-the-shelf emotion models barely agree with human labels, or with each other, on older Spanish speakers. We release a new video-interview dataset to study this gap.",
             "image": "assets/papers/elder.png",
             "project": "",
             "code": ""
@@ -17,6 +19,7 @@
         {
             "title": "OpenMAIA: a Multimodal Automated Interpretability Agent based on open-source models",
             "venueShort": "NeurIPS-W 2025",
+            "tldr": "MAIA-style automated interpretability, where an agent designs experiments to explain what neurons do, rebuilt entirely on open-source models.",
             "image": "assets/papers/openmaia.png",
             "project": "",
             "code": "https://github.com/multimodal-interpretability/maia"

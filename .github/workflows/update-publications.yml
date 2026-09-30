@@ -20,12 +20,13 @@ jobs:
               uses: actions/setup-python@v5
               with:
                   python-version: "3.11"
-                  cache: pip
 
-            - name: Install dependencies
-              run: pip install -r requirements.txt
+            # OpenAlex + Semantic Scholar use only the standard library;
+            # scholarly enables the Google Scholar fallback (bibtexparser 2.x breaks it)
+            - name: Install Google Scholar fallback
+              run: pip install scholarly "bibtexparser<2"
 
-            - name: Merge Google Scholar results into info/publications.json
+            - name: Merge OpenAlex + Semantic Scholar (+ Google Scholar fallback) into info/publications.json
               run: python scripts/update_publications.py
 
             - name: Commit and push if changed
@@ -35,7 +36,7 @@ jobs:
                     git config user.name "github-actions[bot]"
                     git config user.email "github-actions[bot]@users.noreply.github.com"
                     git add info/publications.json
-                    git commit -m "Update publications from Google Scholar"
+                    git commit -m "Update publications from OpenAlex / Semantic Scholar"
                     git push
                     echo "changed=true" >> "$GITHUB_OUTPUT"
                   else
@@ -51,3 +52,34 @@ jobs:
             contents: read
             pages: write
             id-token: write
+
+    # Monthly dead-link report (warning only: shows up in the run summary, never fails)
+    check-links:
+        needs: update-pubs
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: master
+
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+                  cache: pip
+
+            - name: Build site
+              run: pip install -r requirements.txt && python scripts/build.py
+
+            - name: Check links
+              uses: lycheeverse/lychee-action@v2
+              with:
+                  args: >-
+                      --no-progress
+                      --exclude linkedin.com
+                      --exclude x.com
+                      --exclude scholar.google.com
+                      --exclude gc.zgo.at
+                      --root-dir ${{ github.workspace }}/_site
+                      _site/**/*.html
+                  fail: false
+                  jobSummary: true

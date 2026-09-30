@@ -31,7 +31,7 @@ jobs:
                   cache: pip
 
             - name: Install build dependencies
-              run: pip install jinja2 pillow
+              run: pip install -r requirements.txt
 
             - name: Build site
               run: python scripts/build.py

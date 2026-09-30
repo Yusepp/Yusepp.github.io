@@ -4,12 +4,13 @@
         "authors": "Christy Li and Josep Lopez Camuñas and Jake Thomas Touchet and Jacob Andreas and Agata Lapedriza and Antonio Torralba and Tamar Rott Shaham",
         "venue": "Advances in Neural Information Processing Systems (NeurIPS 2025)",
         "year": 2025,
-        "summary": "When a vision model performs image recognition, which visual attributes drive its predictions? Detecting unintended reliance on specific visual features is critical for ensuring model robustness, preventing overfitting, and avoiding spurious correlations. We introduce an automated framework for detecting such dependencies in trained vision models. ",
+        "summary": "When a vision model performs image recognition, which visual attributes drive its predictions? Detecting unintended reliance on specific visual features is critical for ensuring model robustness, preventing overfitting, and avoiding spurious correlations. We introduce an automated framework for detecting such dependencies in trained vision models. At the core of our method is a self-reflective agent that systematically generates and tests hypotheses about visual attributes that a model may rely on. This process is iterative: the agent refines its hypotheses based on experimental outcomes and uses a self-evaluation protocol to assess whether its findings accurately explain model behavior. When inconsistencies arise, the agent self-reflects over its findings and triggers a new cycle of experimentation. We evaluate our approach on a novel benchmark of 130 models designed to exhibit diverse visual attribute dependencies across 18 categories. Our results show that the agent's performance consistently improves with self-reflection, with a significant performance increase over non-reflective baselines. We further demonstrate that the agent identifies real-world visual attribute dependencies in state-of-the-art models, including CLIP's vision encoder and the YOLOv8 object detector.",
         "links": {
-            "pdf": "",
-            "doi": "",
+            "pdf": "https://arxiv.org/pdf/2510.21704",
+            "doi": "https://doi.org/10.52202/085713-4730",
             "code": "",
-            "scholar": "https://arxiv.org/abs/2510.21704"
+            "scholar": "https://arxiv.org/abs/2510.21704",
+            "arxiv": "https://arxiv.org/abs/2510.21704"
         }
     },
     {
@@ -17,12 +18,13 @@
         "authors": "Josep López Camuñas and Cristina Bustos and Yanjun Zhu and Raquel Ros and Agata Lapedriza",
         "venue": "Proceedings of the Winter Conference on Applications of Computer Vision",
         "year": 2025,
-        "summary": "Understanding emotional signals in older adults is crucial for designing virtual assistants that support their well-being. However existing affective computing models often face significant limitations:(1) limited availability of datasets representing older adults especially in non-English-speaking populations and (2) poor generalization of models ",
+        "summary": "Understanding emotional signals in older adults is crucial for designing virtual assistants that support their well-being. However, existing affective computing models often face significant limitations: (1) limited availability of datasets representing older adults, especially in non-English-speaking populations, and (2) poor generalization of models trained on younger or homogeneous demographics. To address these gaps, this study evaluates state-of-the-art affective computing models -- including facial expression recognition, text sentiment analysis, and smile detection -- using videos of older adults interacting with either a person or a virtual avatar. As part of this effort, we introduce a novel dataset featuring Spanish-speaking older adults engaged in human-to-human video interviews. Through three comprehensive analyses, we investigate (1) the alignment between human-annotated labels and automatic model outputs, (2) the relationships between model outputs across different modalities, and (3) individual variations in emotional signals. Using both the Wizard of Oz (WoZ) dataset and our newly collected dataset, we uncover limited agreement between human annotations and model predictions, weak consistency across modalities, and significant variability among individuals. These findings highlight the shortcomings of generalized emotion perception models and emphasize the need of incorporating personal variability and cultural nuances into future systems.",
         "links": {
-            "pdf": "",
-            "doi": "",
+            "pdf": "https://arxiv.org/pdf/2501.16870",
+            "doi": "https://doi.org/10.1109/wacvw65960.2025.00006",
             "code": "",
-            "scholar": "https://openaccess.thecvf.com/content/WACV2025W/CV4Small/html/Camunas_Experimenting_with_Affective_Computing_Models_in_Video_Interviews_with_Spanish-speaking_WACVW_2025_paper.html"
+            "scholar": "https://openaccess.thecvf.com/content/WACV2025W/CV4Small/html/Camunas_Experimenting_with_Affective_Computing_Models_in_Video_Interviews_with_Spanish-speaking_WACVW_2025_paper.html",
+            "arxiv": "https://arxiv.org/abs/2501.16870"
         }
     },
     {
@@ -30,7 +32,7 @@
         "authors": "Josep Lopez Camuñas and Christy Li and Tamar Rott Shaham and Antonio Torralba and Agata Lapedriza",
         "venue": "Mechanistic Interpretability Workshop at NeurIPS 2025",
         "year": 2025,
-        "summary": "Interpreting the internal mechanisms of large neural networks remains a main challenge for trustworthy AI. Recent works such as MAIA (a Multimodal Automated Interpretability Agent) have shown that agent-based systems can iteratively generate and test hypotheses about neuron function without the need for human intervention, which offers a scalable s",
+        "summary": "Understanding how large neural networks represent and transform information still remains a major obstacle to achieving transparent AI systems. Recent works such as MAIA (a Multimodal Automated Interpretability Agent) have shown that agent-based systems can iteratively generate and test hypotheses about neuron function without the need for human intervention, which offers a scalable solution for mechanistic interpretability. However, the existing agent-based systems rely on closed-source APIs, limiting reproducibility and access. To address this, we introduce OpenMAIA, an open-source implementation of MAIA that replaces its closed-source API-based components with open-source models. We experiment with two state-of-the-art multimodal Large Language Models (LLMs) (Gemma-3-27B, Mistral-Small-3.2-24B) as the OpenMAIA backbone models, and update the agent's interpretability toolset with open-source models. Following the neuron description evaluation protocol established in the original MAIA paper, which uses neurons from different vision backbones and also synthetic neurons, we show that OpenMAIA, when using an open-source backbone, achieves performance comparable to the same OpenMAIA configuration that employs Claude-Sonnet-4 as its backbone model. In addition, OpenMAIA converges more efficiently than its implementation with Claude-Sonnet-4. These results demonstrate that competitive, agent-based interpretability can be achieved with a fully open stack, providing a practical and reproducible foundation for community-driven research.",
         "links": {
             "pdf": "",
             "doi": "",

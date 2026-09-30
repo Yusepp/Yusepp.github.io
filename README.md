@@ -6,14 +6,32 @@ Personal research homepage. All content lives in `info/*.json`. `scripts/build.p
 
 | File | What |
 | --- | --- |
-| `info/personal_info.json` | Name, title, bio, emails, research topics, internship note, CV |
+| `info/personal_info.json` | Name, `tagline` (also used for search/link previews), bio, emails, research topics, CV |
 | `info/rrss.json` | GitHub / Scholar / LinkedIn / X links |
-| `info/news.json` | News items (newest first) |
-| `info/publications.json` | Papers (merged monthly from Google Scholar, manual edits are kept) |
-| `info/pub_extras.json` | Per-paper extras matched by title: `image`, `project`, `code`, `venueShort`, `bibtex` |
-| `info/activities.json` | Teaching, awards, service |
+| `info/news.json` | News items, newest first. Add `"expires": "YYYY-MM-DD"` to hide one automatically |
+| `info/publications.json` | Papers, synced monthly from OpenAlex + Semantic Scholar + arXiv, with Google Scholar as a fallback (manual edits are kept) |
+| `info/pub_extras.json` | Per-paper extras matched by title: `tldr`, `venueShort`, `image`, `project`, `code`, `bibtex` |
+| `info/activities.json` | `talks`, `projects`, `teaching`, `awards`, `service` (empty lists are hidden) |
+| `info/misc.json` | Footer note, `goatcounterCode` |
 
-For paper figures, drop a PNG in `assets/papers/` plus a `.webp` next to it (it's used automatically when present).
+For paper figures, drop a PNG in `assets/papers/` plus a `.webp` next to it (it's used automatically when present). Figures open full-size when clicked.
+
+The build warns about news older than 18 months, and generates the 1200×630 link-preview image (`assets/og.png`) from your name, title and avatar.
+
+### Examples
+
+```json
+"talks": [
+    { "label": "2026.05", "title": "Auditing vision models with agents", "event": "Some Workshop", "url": "https://..." }
+],
+"projects": [
+    { "name": "openmaia", "description": "Open-source interpretability agent", "url": "https://github.com/..." }
+]
+```
+
+## Visitor stats (optional)
+
+Sign up at [goatcounter.com](https://www.goatcounter.com) (free, no cookies). Then put your site code (the `CODE` in `CODE.goatcounter.com`) in `info/misc.json` → `"goatcounterCode"`. Leave it empty to turn stats off.
 
 ## Preview locally
 
@@ -23,7 +41,9 @@ python scripts/build.py
 python -m http.server -d _site
 ```
 
-## Deploy
+## Automation
 
-Pushing to `master` runs `.github/workflows/deploy.yml`.
-One-time setup: **Settings → Pages → Source = GitHub Actions**.
+- **Deploy:** pushing to `master` runs `.github/workflows/deploy.yml` (Settings → Pages → Source = GitHub Actions).
+- **Monthly:** `.github/workflows/update-publications.yml` merges new papers/links from OpenAlex and Semantic Scholar, full abstracts from arXiv, and anything still missing (e.g. OpenReview-only papers) from Google Scholar, then redeploys if anything changed, and posts a dead-link report (lychee) in the run summary.
+
+Fonts are self-hosted from Google Fonts' open-source repo (SIL OFL, licenses in `assets/fonts/`).

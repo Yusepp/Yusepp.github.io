@@ -154,6 +154,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <!-- Apply the saved theme (shared with the homepage) before first paint to avoid a flash -->
+        <script>
+            try {
+                var t = localStorage.getItem("theme");
+                if (t) document.documentElement.setAttribute("data-theme", t);
+            } catch (e) {}
+        </script>
         <title>{{ p.short }}: {{ p.title }}</title>
         <meta name="description" content="{{ p.description }}" />
         <link rel="canonical" href="{{ page_url }}" />
@@ -173,6 +181,9 @@
     </head>
     <body>
         <a class="skip-link" href="#main">Skip to content</a>
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" hidden>
+            <span aria-hidden="true">◐</span>
+        </button>
         <header class="hero">
             <div class="container">
                 <p class="hero-short">{{ p.short }}</p>

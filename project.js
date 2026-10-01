@@ -128,7 +128,38 @@ function initVideos() {
     });
 }
 
+// -------- Theme toggle (same behaviour and storage key as the homepage's site.js) --------
+
+function initThemeToggle() {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+    const root = document.documentElement;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function current() {
+        return root.getAttribute("data-theme") || (media.matches ? "dark" : "light");
+    }
+    function sync() {
+        const dark = current() === "dark";
+        btn.setAttribute("aria-pressed", String(dark));
+        btn.title = dark ? "Switch to light mode" : "Switch to dark mode";
+    }
+
+    btn.hidden = false;
+    sync();
+    media.addEventListener("change", sync);
+    btn.addEventListener("click", function () {
+        const next = current() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try {
+            localStorage.setItem("theme", next);
+        } catch (e) {}
+        sync();
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    initThemeToggle();
     initVideos();
     document.querySelectorAll("[data-explorer]").forEach(initExplorer);
     initDetailsToggle();

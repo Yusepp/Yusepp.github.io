@@ -18,13 +18,26 @@
 <figure class="figure" id="fig-{{ id }}">
     {% if m.exists %}
         {% if m.kind == "video" %}
-        {# Native controls: play/pause, timeline scrubbing, fullscreen. Autoplay is skipped for reduced motion (project.js). #}
-        <video class="figure-media" src="{{ m.src }}"{% if m.poster %} poster="{{ m.poster }}"{% endif %} controls autoplay muted loop playsinline preload="metadata" aria-label="{{ m.caption or m.todo }}" style="aspect-ratio: {{ m.aspect }}"></video>
+        {# Native controls: play/pause, timeline scrubbing, fullscreen. Autoplay is skipped for reduced motion (project.js).
+           With a dark variant, <source media> picks by OS theme; project.js re-picks when the visitor toggles the theme. #}
+        <video class="figure-media"{% if m.poster %} poster="{{ m.poster }}"{% endif %} controls autoplay muted loop playsinline preload="metadata"
+               aria-label="{{ m.caption or m.todo }}" style="aspect-ratio: {{ m.aspect }}"
+               {% if m.src_dark %}data-src-light="{{ m.src }}" data-src-dark="{{ m.src_dark }}" data-poster-light="{{ m.poster }}" data-poster-dark="{{ m.poster_dark }}"{% endif %}>
+            {% if m.src_dark %}<source src="{{ m.src_dark }}" type="video/mp4" media="(prefers-color-scheme: dark)" />{% endif %}
+            <source src="{{ m.src }}" type="video/mp4" />
+        </video>
         {% else %}
-        <picture>
+        {# Light and dark variants are both in the HTML; CSS shows the one for the current theme (the other stays lazy/unloaded). #}
+        <picture{% if m.src_dark %} class="theme-light-only"{% endif %}>
             {% if m.webp %}<source srcset="{{ m.webp }}" type="image/webp" />{% endif %}
             <img class="figure-media" src="{{ m.src }}" alt="{{ alt or m.caption or m.todo }}" loading="lazy" decoding="async" style="aspect-ratio: {{ m.aspect }}" />
         </picture>
+        {% if m.src_dark %}
+        <picture class="theme-dark-only">
+            {% if m.webp_dark %}<source srcset="{{ m.webp_dark }}" type="image/webp" />{% endif %}
+            <img class="figure-media" src="{{ m.src_dark }}" alt="{{ alt or m.caption or m.todo }}" loading="lazy" decoding="async" style="aspect-ratio: {{ m.aspect }}" />
+        </picture>
+        {% endif %}
         {% endif %}
     {% else %}
         <div class="placeholder" style="aspect-ratio: {{ m.aspect }}" role="img" aria-label="Placeholder for {{ m.file }}">
@@ -154,6 +167,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <!-- Apply the saved theme (shared with the homepage) before first paint to avoid a flash -->
+        <script>
+            try {
+                var t = localStorage.getItem("theme");
+                if (t) document.documentElement.setAttribute("data-theme", t);
+            } catch (e) {}
+        </script>
         <title>{{ p.short }}: {{ p.title }}</title>
         <meta name="description" content="{{ p.description }}" />
         <link rel="canonical" href="{{ page_url }}" />
@@ -173,6 +194,9 @@
     </head>
     <body>
         <a class="skip-link" href="#main">Skip to content</a>
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" hidden>
+            <span aria-hidden="true">◐</span>
+        </button>
         <header class="hero">
             <div class="container">
                 <p class="hero-short">{{ p.short }}</p>

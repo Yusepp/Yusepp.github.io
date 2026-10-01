@@ -364,6 +364,13 @@ def build_projects(env, today):
             slot["webp"] = f"media/{webp.name}" if slot["kind"] == "image" and webp.exists() else ""
             poster = path.with_name(path.stem + "-poster.webp")  # still frame shown before/while paused
             slot["poster"] = f"media/{poster.name}" if slot["kind"] == "video" and poster.exists() else ""
+            # Optional dark-theme variant: <name>-dark.<ext> (+ .webp / -poster.webp), swapped in by theme
+            dark = path.with_name(path.stem + "-dark" + path.suffix)
+            slot["src_dark"] = f"media/{dark.name}" if dark.exists() else ""
+            dark_webp = dark.with_suffix(".webp")
+            slot["webp_dark"] = f"media/{dark_webp.name}" if slot["kind"] == "image" and dark_webp.exists() else ""
+            dark_poster = dark.with_name(dark.stem + "-poster.webp")
+            slot["poster_dark"] = f"media/{dark_poster.name}" if slot["kind"] == "video" and dark_poster.exists() else ""
             if not slot["exists"]:
                 missing.append(slot["file"])
         if missing:

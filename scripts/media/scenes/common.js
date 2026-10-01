@@ -2,6 +2,11 @@
 // and render.mjs calls seek() for each frame, so output never depends on real time.
 // window.PROJECT (projects/peqemo/project.json) is injected by render.mjs.
 
+// ?theme=dark renders the dark variant (palette in common.css)
+if (new URLSearchParams(location.search).get("theme") === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+}
+
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 // Progress of t through [a, b], eased, in 0..1.

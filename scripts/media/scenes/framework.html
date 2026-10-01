@@ -8,25 +8,25 @@
     .box { position: absolute; border-radius: 16px; padding: 18px 22px; font-size: 24px; }
     .box h4 { margin: 0 0 6px; font-size: 26px; }
     .box small { display: block; font-size: 19px; color: var(--muted); line-height: 1.35; }
-    .mod { background: var(--panel); border: 2px solid #dcdcdc; text-align: center; display: flex;
+    .mod { background: var(--panel); border: 2px solid var(--border); text-align: center; display: flex;
            flex-direction: column; justify-content: center; }
     #img { left: 60px; top: 90px; width: 300px; height: 225px; padding: 0; overflow: hidden; }
     #img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     #imgCap { position: absolute; left: 60px; top: 324px; width: 300px; text-align: center; font-size: 19px; color: var(--muted); }
     #enc { left: 430px; top: 110px; width: 230px; height: 185px; }
     #proj { left: 720px; top: 130px; width: 190px; height: 145px; }
-    #prompt { left: 60px; top: 410px; width: 600px; background: #fff; border: 2px solid #dcdcdc;
+    #prompt { left: 60px; top: 410px; width: 600px; background: var(--surface); border: 2px solid var(--border);
               font-family: ui-monospace, Consolas, monospace; font-size: 16px; line-height: 1.42; color: var(--soft); white-space: pre-wrap; }
     #promptCap { position: absolute; left: 60px; top: 710px; width: 600px; text-align: center; font-size: 19px; color: var(--muted); }
     #prompt b { color: var(--ours); font-weight: 700; }
     #tok { left: 720px; top: 505px; width: 190px; height: 145px; }
-    #llm { left: 980px; top: 150px; width: 260px; height: 520px; background: #eef3fc; border: 3px solid var(--ours); }
+    #llm { left: 980px; top: 150px; width: 260px; height: 520px; background: var(--blue-soft); border: 3px solid var(--ours); }
     #llm h4 { color: var(--ours); font-size: 30px; }
     #lora { position: absolute; left: 1165px; top: 120px; padding: 6px 16px; border-radius: 999px; font-size: 20px;
             font-weight: 700; color: #fff; background: var(--trigger); }
     #emo { position: absolute; left: 910px; top: 690px; width: 400px; text-align: center; font-size: 19px; color: var(--label);
            font-weight: 700; white-space: nowrap; }
-    #out { left: 1310px; top: 150px; width: 550px; background: #fff; border: 2px solid #dcdcdc; font-size: 20px; line-height: 1.5; color: var(--soft); }
+    #out { left: 1310px; top: 150px; width: 550px; background: var(--surface); border: 2px solid var(--border); font-size: 20px; line-height: 1.5; color: var(--soft); }
     #out .row { margin-bottom: 12px; }
     #out .row:last-child { margin-bottom: 0; }
     #out .tag { font-size: 15px; margin-right: 6px; }
@@ -37,7 +37,7 @@
 <body>
 <div class="stage" id="stage">
     <svg id="arrows"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-        <path d="M0,0 L10,5 L0,10 z" fill="#9a9a9a"/></marker></defs></svg>
+        <path d="M0,0 L10,5 L0,10 z" style="fill: var(--arrow)"/></marker></defs></svg>
 
     <div class="box" id="img"><img src="../../../projects/peqemo/media/explore-pansies.jpg" alt="" /></div>
     <div id="imgCap">Input image</div>
@@ -78,7 +78,7 @@ function arrow(a, b, fromSide = "right", toSide = "left") {
     const p1 = fromSide === "right" ? [r1.right + 6, r1.top + r1.height / 2] : [r1.left + r1.width / 2, r1.bottom + 6];
     let p2 = [r2.left - 8, r1.top + r1.height / 2];
     if (toSide === "left-mid") p2 = [r2.left - 8, p1[1]];
-    return `<path d="M${p1[0]},${p1[1]} L${p2[0]},${p2[1]}" stroke="#9a9a9a" stroke-width="4" fill="none" marker-end="url(#ah)"/>`;
+    return `<path d="M${p1[0]},${p1[1]} L${p2[0]},${p2[1]}" style="stroke: var(--arrow)" stroke-width="4" fill="none" marker-end="url(#ah)"/>`;
 }
 
 window.setup = function () {

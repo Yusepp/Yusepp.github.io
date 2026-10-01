@@ -128,39 +128,88 @@ function initVideos() {
     });
 }
 
-// -------- Theme toggle (same behaviour and storage key as the homepage's site.js) --------
+// -------- Theme (same behaviour and storage key as the homepage's site.js) --------
+
+const osDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+// The visitor's explicit choice (html[data-theme]) wins; otherwise follow the OS/browser.
+function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") || (osDark.matches ? "dark" : "light");
+}
+
+function announceTheme() {
+    document.dispatchEvent(new CustomEvent("themechange", { detail: currentTheme() }));
+}
 
 function initThemeToggle() {
     const btn = document.getElementById("theme-toggle");
+    osDark.addEventListener("change", announceTheme);
     if (!btn) return;
-    const root = document.documentElement;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
 
-    function current() {
-        return root.getAttribute("data-theme") || (media.matches ? "dark" : "light");
-    }
     function sync() {
-        const dark = current() === "dark";
+        const dark = currentTheme() === "dark";
         btn.setAttribute("aria-pressed", String(dark));
         btn.title = dark ? "Switch to light mode" : "Switch to dark mode";
     }
 
     btn.hidden = false;
     sync();
-    media.addEventListener("change", sync);
+    document.addEventListener("themechange", sync);
     btn.addEventListener("click", function () {
-        const next = current() === "dark" ? "light" : "dark";
-        root.setAttribute("data-theme", next);
+        const next = currentTheme() === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
         try {
             localStorage.setItem("theme", next);
         } catch (e) {}
-        sync();
+        announceTheme();
+    });
+}
+
+// -------- Videos with a dark variant: follow the theme, keeping position and play state --------
+
+function initThemedVideos() {
+    const videos = Array.from(document.querySelectorAll("video[data-src-dark]"));
+
+    function apply(video) {
+        const theme = currentTheme();
+        const want = video.dataset["src" + (theme === "dark" ? "Dark" : "Light")];
+        const poster = video.dataset["poster" + (theme === "dark" ? "Dark" : "Light")];
+        if (poster) video.poster = poster;
+        // currentSrc is absolute; compare by file name
+        if (video.currentSrc && video.currentSrc.endsWith(want)) return;
+        const t = video.currentTime;
+        // Before anything loaded, honour autoplay (it's off under reduced motion); afterwards keep the state
+        const wasPlaying = video.currentSrc ? !video.paused : video.autoplay;
+        video.autoplay = false; // otherwise changing src would restart playback even when paused
+        video.src = want; // overrides the <source media> choice
+        video.addEventListener("canplay", function () {
+            if (t) video.currentTime = Math.min(t, video.duration || t);
+            if (wasPlaying) resume(video);
+        }, { once: true });
+    }
+
+    // Browsers refuse to play silent videos in hidden tabs; if that happens, retry once the tab is visible
+    function resume(video) {
+        video.play().catch(function () {
+            if (!document.hidden) return;
+            document.addEventListener("visibilitychange", function retry() {
+                if (document.hidden) return;
+                document.removeEventListener("visibilitychange", retry);
+                video.play().catch(function () {});
+            });
+        });
+    }
+
+    videos.forEach(apply);
+    document.addEventListener("themechange", function () {
+        videos.forEach(apply);
     });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     initThemeToggle();
     initVideos();
+    initThemedVideos();
     document.querySelectorAll("[data-explorer]").forEach(initExplorer);
     initDetailsToggle();
     initCopy();

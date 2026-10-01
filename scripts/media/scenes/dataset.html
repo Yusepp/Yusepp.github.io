@@ -15,13 +15,13 @@
              padding: 10px; border-radius: 14px; background: var(--panel); }
     .thumb img { width: 150px; height: 100px; object-fit: cover; border-radius: 10px; display: block; }
     .thumb .gt { font-size: 21px; color: var(--soft); }
-    .thumb .gt b { display: inline-block; margin-top: 4px; padding: 2px 12px; border-radius: 999px; background: #e3e3e3; color: var(--text); }
+    .thumb .gt b { display: inline-block; margin-top: 4px; padding: 2px 12px; border-radius: 999px; background: var(--chip-bg); color: var(--text); }
     .stat { margin-top: 18px; font-size: 21px; color: var(--soft); line-height: 1.5; }
     .stat b { color: var(--text); }
 
     /* Annotator */
     #glm { left: 640px; width: 560px; }
-    .annot { padding: 22px 24px; border-radius: 16px; border: 3px solid var(--ours); background: #eef3fc; }
+    .annot { padding: 22px 24px; border-radius: 16px; border: 3px solid var(--ours); background: var(--blue-soft); }
     .annot h4 { margin: 0 0 4px; font-size: 28px; color: var(--ours); }
     .annot .sub2 { font-size: 20px; color: var(--soft); margin-bottom: 14px; }
     .rules { font-size: 19.5px; color: var(--soft); line-height: 1.5; padding-left: 22px; margin: 0; }
@@ -38,7 +38,7 @@
     .part.t code { color: var(--trigger); }
     .part.l code { color: var(--label); }
     .part div { margin-top: 6px; font-size: 20px; color: var(--soft); line-height: 1.45; }
-    #total { margin-top: 18px; padding: 14px 18px; border-radius: 14px; background: var(--text); color: #fff; font-size: 23px; line-height: 1.4; }
+    #total { margin-top: 18px; padding: 14px 18px; border-radius: 14px; background: var(--inv); color: var(--on-inv); font-size: 23px; line-height: 1.4; }
     #total b { font-size: 30px; }
 
     svg { position: absolute; left: 0; top: 0; width: 1920px; height: 840px; }
@@ -47,7 +47,7 @@
 <body>
 <div class="stage" id="stage">
     <svg id="arrows"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-        <path d="M0,0 L10,5 L0,10 z" fill="#9a9a9a"/></marker></defs></svg>
+        <path d="M0,0 L10,5 L0,10 z" style="fill: var(--arrow)"/></marker></defs></svg>
 
     <div class="col" id="emoset">
         <h3>EmoSet</h3>
@@ -88,7 +88,7 @@ const $ = (id) => document.getElementById(id);
 function arrow(a, b) {
     const r1 = $(a).getBoundingClientRect(), r2 = $(b).getBoundingClientRect();
     const y = 430;
-    return `<path d="M${r1.right + 14},${y} L${r2.left - 16},${y}" stroke="#9a9a9a" stroke-width="5" fill="none" marker-end="url(#ah)"/>`;
+    return `<path d="M${r1.right + 14},${y} L${r2.left - 16},${y}" style="stroke: var(--arrow)" stroke-width="5" fill="none" marker-end="url(#ah)"/>`;
 }
 window.setup = function () {
     $("arrows").insertAdjacentHTML("beforeend", arrow("emoset", "glm") + arrow("glm", "out"));

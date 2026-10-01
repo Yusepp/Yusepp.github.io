@@ -59,6 +59,8 @@ node render.mjs teaser --preview 3,9,15            # dump a few frames to script
 
 Each scene reads the real justifications from `project.json`, so text shown in videos is always the model's verbatim output. Cue boxes on photos are placed by hand in each scene file (fractions of the photo size).
 
+Every scene is rendered twice: a light version and a dark one (`teaser-dark.mp4`, `framework-dark.png`, …, palette in `scenes/common.css`). The page shows whichever matches the visitor's theme and swaps them when the theme toggle is used; a video keeps its position and play/pause state across the swap. Use `--theme light|dark` to render only one. Any media slot can have a dark twin: just add `<name>-dark.<ext>` next to the light file.
+
 ## Visitor stats (optional)
 
 Sign up at [goatcounter.com](https://www.goatcounter.com) (free, no cookies). Then put your site code (the `CODE` in `CODE.goatcounter.com`) in `info/misc.json` → `"goatcounterCode"`. Leave it empty to turn stats off.

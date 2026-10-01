@@ -133,6 +133,25 @@
     --diff-soft: rgba(187, 128, 9, 0.15);
 }
 
+/* Themed media: show the variant matching the current theme */
+.theme-dark-only {
+    display: none;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-light-only {
+        display: none;
+    }
+    :root:not([data-theme="light"]) .theme-dark-only {
+        display: block;
+    }
+}
+:root[data-theme="dark"] .theme-light-only {
+    display: none;
+}
+:root[data-theme="dark"] .theme-dark-only {
+    display: block;
+}
+
 /* Theme toggle: fixed top-right, shown once project.js runs */
 .theme-toggle {
     position: fixed;

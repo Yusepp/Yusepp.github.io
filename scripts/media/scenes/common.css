@@ -15,17 +15,48 @@
     font-weight: 700;
 }
 
+/* Light values = the original look. Dark values match project.css's dark palette.
+   render.mjs renders each scene twice: as-is, and with ?theme=dark (sets html[data-theme=dark]). */
 :root {
+    --bg: #fff;
+    --surface: #fff;
     --text: #363636;
     --soft: #4a4a4a;
     --muted: #7a7a7a;
     --line: #e6e6e6;
     --panel: #f5f5f5;
+    --border: #dcdcdc;
+    --arrow: #9a9a9a;
+    --chip-bg: #e3e3e3;
+    --blue-soft: #eef3fc;
+    --tok: #cfcfcf;
+    --track: #e6e6e6;
+    --inv: #363636;
+    --on-inv: #fff;
     --ours: #3273dc;
     --perception: #3273dc;
     --trigger: #9f5bd3;
     --label: #2f855a;
     --gt: #48c78e;
+}
+
+:root[data-theme="dark"] {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --text: #e6e6e6;
+    --soft: #c9d1d9;
+    --muted: #8b949e;
+    --line: #30363d;
+    --panel: #161b22;
+    --border: #3d444d;
+    --arrow: #6e7681;
+    --chip-bg: #30363d;
+    --blue-soft: rgba(56, 139, 253, 0.12);
+    --tok: #484f58;
+    --track: #21262d;
+    --inv: #e6e6e6;
+    --on-inv: #0d1117;
+    --ours: #58a6ff;
 }
 
 * {
@@ -34,7 +65,7 @@
 html,
 body {
     margin: 0;
-    background: #fff;
+    background: var(--bg);
     color: var(--text);
     font-family: "Noto Sans", sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -43,7 +74,7 @@ body {
 .stage {
     position: relative;
     overflow: hidden;
-    background: #fff;
+    background: var(--bg);
 }
 
 .kicker {
@@ -116,15 +147,15 @@ body {
     padding: 6px 16px;
     margin: 0 8px 10px 0;
     border-radius: 999px;
-    border: 2px solid #d5d5d5;
+    border: 2px solid var(--border);
     font-size: 21px;
     color: var(--soft);
-    background: #fff;
+    background: var(--bg);
 }
 .chip.on {
-    background: var(--text);
-    border-color: var(--text);
-    color: #fff;
+    background: var(--inv);
+    border-color: var(--inv);
+    color: var(--on-inv);
 }
 .chip.gt {
     box-shadow: inset 0 0 0 3px var(--gt);
